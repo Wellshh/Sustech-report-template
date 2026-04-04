@@ -16,3 +16,5 @@ example.*
 
 # Maintainer-only planning doc (not published with the repo)
 PLAN.md
+tests/design.txt
+RESEARCH.md
