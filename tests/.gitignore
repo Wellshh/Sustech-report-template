@@ -1,0 +1,21 @@
+# LaTeX compilation artifacts from unit / integration / stress runs
+*.aux
+*.log
+*.out
+*.listing
+*.toc
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+
+# Flat build output directory (all compiled PDFs and intermediates)
+_build/
+
+# Visual regression: current-run PDFs and diff images are transient
+regression/current/
+regression/diffs/
+
+# Keep baselines and .tex sources tracked
+!regression/baselines/
+!**/*.tex
+!**/*.sh

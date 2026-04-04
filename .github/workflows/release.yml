@@ -1,0 +1,99 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write   # required by softprops/action-gh-release
+
+jobs:
+  release:
+    name: Build and Publish Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Reuse the same apt cache key as ci.yml so the cache is shared.
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: apt-texlive-${{ runner.os }}-${{ hashFiles('.github/workflows/ci.yml') }}
+          restore-keys: apt-texlive-${{ runner.os }}-
+
+      - name: Install TeX Live and tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            texlive-xetex \
+            texlive-latex-extra \
+            texlive-fonts-extra \
+            texlive-science \
+            texlive-pictures \
+            texlive-bibtex-extra \
+            texlive-lang-chinese \
+            biber \
+            poppler-utils \
+            fonts-noto-cjk \
+            fonts-wqy-zenhei \
+            zip
+
+      # Run acceptance + unit + integration; skip visual regression, perf, and
+      # stress because the release is already tagged from a passing main push.
+      - name: Run acceptance tests
+        run: |
+          bash tests/run_all.sh \
+            --skip-regression \
+            --skip-performance \
+            --skip-stress
+
+      # Compile example.tex (full 3-pass pipeline with biber).
+      - name: Compile example.pdf
+        run: make example
+
+      # Build the distribution zip for the release.
+      - name: Build distribution archive
+        run: make dist VERSION=${{ github.ref_name }}
+
+      # Upload logs and PDFs for post-mortem inspection.
+      - name: Upload build logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-build-logs-${{ github.ref_name }}
+          path: tests/_build/*.log
+          retention-days: 30
+
+      # Publish GitHub Release with zip + compiled PDF.
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: SUSTech Report Template ${{ github.ref_name }}
+          body: |
+            ## What's included
+
+            | File | Description |
+            |------|-------------|
+            | `SUSTechHomework.cls` | The LaTeX document class |
+            | `example.tex` / `example.bib` | Annotated usage example |
+            | `example.pdf` | Pre-compiled example PDF |
+            | `examples/` | Minimal and project-report templates |
+            | `assets/` | Logo and brand assets |
+
+            ## Requirements
+
+            - XeLaTeX (TeX Live 2022+)
+            - Biber (for bibliography)
+            - Chinese fonts: `fonts-noto-cjk` or `fonts-wqy-zenhei`
+
+            See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for common issues.
+          files: |
+            dist/SUSTech-report-template-${{ github.ref_name }}.zip
+            example.pdf
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}

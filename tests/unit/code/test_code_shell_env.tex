@@ -1,0 +1,28 @@
+% Tests sustechshell environment (dark terminal style).
+% !TEX program = xelatex
+\documentclass[code=listings]{SUSTechHomework}
+
+\title{Shell Environment Test}
+\coursecode{TEST}
+\coursename{Shell Output}
+
+\begin{document}
+\maketitle
+
+\section{Shell Block}
+
+\begin{sustechshell}
+$ xelatex example.tex
+This is XeTeX, Version 3.141592653
+Output written on example.pdf (2 pages).
+UniqueShellOutput201
+\end{sustechshell}
+
+\section{Named Shell Block}
+
+\begin{sustechshell}[title=Terminal]
+$ echo "UniqueShellNamed202"
+UniqueShellNamed202
+\end{sustechshell}
+
+\end{document}

@@ -1,0 +1,32 @@
+% Tests sustechnote and sustechwarning environments with default and custom titles.
+% !TEX program = xelatex
+\documentclass{SUSTechHomework}
+
+\title{Note Box Rendering Test}
+\coursecode{TEST}
+\coursename{Visual Components}
+
+\begin{document}
+\maketitle
+
+\section{Info Boxes}
+
+\begin{sustechnote}
+Default note box. UniqueNoteDefaultMarker101
+\end{sustechnote}
+
+\begin{sustechnote}[title=Design Note]
+Custom-titled note. UniqueNoteCustomMarker102
+\end{sustechnote}
+
+\section{Warning Boxes}
+
+\begin{sustechwarning}
+Default warning. UniqueWarnDefaultMarker103
+\end{sustechwarning}
+
+\begin{sustechwarning}[title=Danger Zone]
+Custom-titled warning. UniqueWarnCustomMarker104
+\end{sustechwarning}
+
+\end{document}

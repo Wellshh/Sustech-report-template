@@ -1,0 +1,211 @@
+% Performance benchmark: code-heavy document (listings backend).
+% Measures tcolorbox + listings rendering cost for many code blocks.
+% Expected compile time: <= 45 s (two passes).
+% !TEX program = xelatex
+\documentclass[code=listings]{SUSTechHomework}
+
+\title{Perf Benchmark: Listings Heavy}
+\coursecode{PERF}
+\coursename{Code Block Performance}
+
+\begin{document}
+\maketitle
+
+\section{Python}
+
+\begin{sustechcode}{Python}
+def quicksort(arr):
+    if len(arr) <= 1:
+        return arr
+    pivot = arr[len(arr) // 2]
+    left  = [x for x in arr if x < pivot]
+    mid   = [x for x in arr if x == pivot]
+    right = [x for x in arr if x > pivot]
+    return quicksort(left) + mid + quicksort(right)
+
+data = [3, 6, 8, 10, 1, 2, 1]
+print(quicksort(data))
+\end{sustechcode}
+
+\begin{sustechcode}{Python}
+import numpy as np
+
+def gradient_descent(f_grad, x0, lr=0.01, n_iter=100):
+    x = x0.copy()
+    for _ in range(n_iter):
+        x -= lr * f_grad(x)
+    return x
+
+x_init = np.array([2.0, 3.0])
+result  = gradient_descent(lambda x: 2 * x, x_init)
+print(f"Converged: {result}")
+\end{sustechcode}
+
+\section{Modern C++}
+
+\begin{sustechcode}{moderncpp}
+#include <vector>
+#include <algorithm>
+#include <ranges>
+
+template<std::ranges::range R>
+auto mean(R const& r) -> double {
+    auto s = std::ranges::fold_left(r, 0.0, std::plus{});
+    return s / static_cast<double>(std::ranges::distance(r));
+}
+
+int main() {
+    std::vector<double> v{1.0, 2.5, 3.7, 4.2, 5.0};
+    auto filtered = v | std::views::filter([](double x){ return x > 2.0; });
+    return mean(filtered) > 3.0 ? 0 : 1;
+}
+\end{sustechcode}
+
+\begin{sustechcode}{moderncpp}
+#include <memory>
+#include <concepts>
+
+template<typename T>
+concept Serializable = requires(T t) {
+    { t.serialize() } -> std::convertible_to<std::string>;
+};
+
+struct Config {
+    int retries{3};
+    double timeout{30.0};
+    std::string serialize() const {
+        return "retries=" + std::to_string(retries);
+    }
+};
+
+auto process(Serializable auto const& cfg) -> std::string {
+    return cfg.serialize();
+}
+\end{sustechcode}
+
+\section{MATLAB}
+
+\begin{sustechcode}{matlab}
+function [mu, sigma] = stats(data)
+    n     = numel(data);
+    mu    = sum(data) / n;
+    sigma = sqrt(sum((data - mu).^2) / (n - 1));
+end
+
+x = randn(1, 1000);
+[m, s] = stats(x);
+fprintf('mean=%.4f  std=%.4f\n', m, s);
+\end{sustechcode}
+
+\begin{sustechcode}{matlab}
+function result = newton_raphson(f, df, x0, tol, max_iter)
+    x = x0;
+    for k = 1:max_iter
+        fx = f(x);
+        if abs(fx) < tol
+            break;
+        end
+        x = x - fx / df(x);
+    end
+    result = x;
+end
+
+f  = @(x) x.^3 - 2*x - 5;
+df = @(x) 3*x.^2 - 2;
+root = newton_raphson(f, df, 2.0, 1e-10, 50);
+fprintf('Root: %.10f\n', root);
+\end{sustechcode}
+
+\section{YAML and JSON}
+
+\begin{sustechcode}{yaml}
+pipeline: &base_pipeline
+  enabled: true
+  retries: 3
+  timeout: null
+
+stages:
+  - name: build
+    <<: *base_pipeline
+    script: make all
+  - name: test
+    <<: *base_pipeline
+    script: make test
+    timeout: 300
+  - name: deploy
+    enabled: false
+    script: make dist
+\end{sustechcode}
+
+\begin{sustechcode}{json}
+{
+  "project": "SUSTechHomework",
+  "version": "2.0.0",
+  "engines": ["xelatex"],
+  "dependencies": {
+    "tcolorbox": ">=5.0",
+    "biblatex":  ">=3.18",
+    "biber":     ">=2.18"
+  },
+  "features": ["listings", "minted", "tikz", "math"]
+}
+\end{sustechcode}
+
+\section{Diff}
+
+\begin{sustechdiff}
+--- a/SUSTechHomework.cls
++++ b/SUSTechHomework.cls
+@@ -1,6 +1,8 @@
+ \NeedsTeXFormat{LaTeX2e}
+-\ProvidesClass{SUSTechHomework}[2024/01/01 v1.0]
++\ProvidesClass{SUSTechHomework}[2026/04/01 v2.0]
+ 
+ \LoadClass{article}
++\RequirePackage{kvoptions}
++\RequirePackage{etoolbox}
+\end{sustechdiff}
+
+\section{Shell Blocks}
+
+\begin{sustechshell}
+$ make test-unit
+=== unit / metadata ===
+  PASS: compiled test_meta_fields
+  PASS: compiled test_meta_lang_en
+=== unit / code ===
+  PASS: compiled test_code_listings_basic
+  PASS: compiled test_code_langs_extended
+--- Unit Tests Summary ---
+  Passed:  33
+  Failed:  0
+  STATUS: PASSED
+\end{sustechshell}
+
+\begin{sustechlongcode}{Python}[Full Pipeline][src/pipeline.py]
+"""
+Longer code block to stress-test tcolorbox breakable environments.
+"""
+from dataclasses import dataclass
+from typing import Iterator
+
+@dataclass
+class Sample:
+    value: float
+    weight: float = 1.0
+
+def weighted_mean(samples: list[Sample]) -> float:
+    total_w = sum(s.weight for s in samples)
+    return sum(s.value * s.weight for s in samples) / total_w
+
+def batch(items: list[Sample], size: int) -> Iterator[list[Sample]]:
+    for i in range(0, len(items), size):
+        yield items[i : i + size]
+
+if __name__ == "__main__":
+    data = [Sample(float(i), 1.0 / (i + 1)) for i in range(20)]
+    for chunk in batch(data, 5):
+        print(f"batch mean: {weighted_mean(chunk):.4f}")
+\end{sustechlongcode}
+
+\end{document}

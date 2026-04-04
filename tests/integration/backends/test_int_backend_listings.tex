@@ -1,0 +1,59 @@
+% Integration: listings backend with formal titlepage and full feature set.
+% Verifies that code=listings works alongside titlepage=formal, multi-section body.
+% !TEX program = xelatex
+\documentclass[code=listings,titlepage=formal]{SUSTechHomework}
+
+\title{Listings Backend Full Integration}
+\coursecode{INT401}
+\coursename{Backend Integration Test}
+\semester{Spring 2026}
+\instructor{Prof. Backend}
+
+\begin{document}
+
+\clearauthors
+\addauthor{Backend Tester}{40001}{bt@sustech.edu.cn}{CSE}{Shuren}{Testing}
+
+\clearcontributions
+\addcontribution{Backend Tester}{All integration work}
+
+\maketitle
+
+\section{Python}
+
+\begin{sustechcode}{Python}
+class UniqueIntClass401:
+    """Full integration marker."""
+    def run(self) -> str:
+        return "IntegrationListings401"
+\end{sustechcode}
+
+\section{JSON Config}
+
+\begin{sustechcode}{json}
+{
+  "test": "UniqueIntJson402",
+  "backend": "listings"
+}
+\end{sustechcode}
+
+\section{Shell Output}
+
+\begin{sustechshell}
+$ python run_tests.py
+UniqueIntShell403
+All tests passed.
+\end{sustechshell}
+
+\section{Inline Code}
+
+The method \code{UniqueIntInline404} returns the result string.
+
+\section{Mixed Notes and Code}
+
+\begin{sustechnote}[title=Implementation Note]
+Use \code{listings} backend when \code{minted} / Pygments is unavailable.
+UniqueIntNote405
+\end{sustechnote}
+
+\end{document}

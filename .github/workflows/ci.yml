@@ -1,0 +1,120 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, dev]
+
+# Cancel in-progress runs for the same branch/PR on new pushes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Fast gate for pull requests: unit tests only (~5 min).
+  # ---------------------------------------------------------------------------
+  unit:
+    name: Unit Tests (PR gate)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Cache apt archives to speed up repeated installs.
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: apt-texlive-${{ runner.os }}-${{ hashFiles('.github/workflows/ci.yml') }}
+          restore-keys: apt-texlive-${{ runner.os }}-
+
+      - name: Install TeX Live and tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            texlive-xetex \
+            texlive-latex-extra \
+            texlive-fonts-extra \
+            texlive-science \
+            texlive-pictures \
+            texlive-bibtex-extra \
+            texlive-lang-chinese \
+            biber \
+            poppler-utils \
+            fonts-noto-cjk \
+            fonts-wqy-zenhei
+
+      - name: Run unit tests
+        run: bash tests/run_all.sh --unit-only
+
+      - name: Upload build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-build-logs-${{ github.run_id }}
+          path: |
+            tests/_build/*.log
+            tests/_build/*.pdf
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Full test suite for pushes to main/dev (skip visual regression, no diff-pdf).
+  # ---------------------------------------------------------------------------
+  full:
+    name: Full Test Suite
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: apt-texlive-${{ runner.os }}-${{ hashFiles('.github/workflows/ci.yml') }}
+          restore-keys: apt-texlive-${{ runner.os }}-
+
+      - name: Install TeX Live and tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            texlive-xetex \
+            texlive-latex-extra \
+            texlive-fonts-extra \
+            texlive-science \
+            texlive-pictures \
+            texlive-bibtex-extra \
+            texlive-lang-chinese \
+            biber \
+            poppler-utils \
+            fonts-noto-cjk \
+            fonts-wqy-zenhei
+
+      - name: Run full test suite (skip visual regression)
+        # Visual regression requires diff-pdf which is not available in CI.
+        run: bash tests/run_all.sh --skip-regression
+
+      - name: Upload build logs and PDFs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-build-artifacts-${{ github.run_id }}
+          path: |
+            tests/_build/*.log
+            tests/_build/*.pdf
+          retention-days: 14
+
+      - name: Upload performance report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-report-${{ github.run_id }}
+          path: tests/_build/perf_report.tsv
+          retention-days: 30
+          if-no-files-found: ignore

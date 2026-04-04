@@ -1,0 +1,152 @@
+% Performance: large document with many sections, code blocks, and diagrams.
+% Compile time with two passes should stay under the configured limit.
+% !TEX program = xelatex
+\documentclass[code=listings]{SUSTechHomework}
+
+\title{Large Document Performance Test}
+\coursecode{PERF001}
+\coursename{Performance Testing}
+\author{Perf Tester}
+\sid{99990001}
+\semester{Spring 2026}
+
+\begin{document}
+\maketitle
+
+% --- 20 sections with mixed content to simulate a real large report ---
+
+\section{Introduction}
+Performance test document. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+
+\section{Background}
+Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+
+\begin{sustechnote}
+Background note block. Ut enim ad minim veniam.
+\end{sustechnote}
+
+\section{Related Work}
+Quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+\begin{sustechcode}{Python}
+# Section 3 code block
+def related_work():
+    return "processing"
+\end{sustechcode}
+
+\section{Methodology}
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.
+
+\begin{table}[htbp]
+  \centering
+  \begin{tabular}{lll}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{Method} & \sustechtableheader{Precision} & \sustechtableheader{Recall} \\
+    \midrule
+    Baseline & 0.82 & 0.78 \\
+    Ours     & 0.91 & 0.88 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Methodology comparison table}
+\end{table}
+
+\section{Implementation}
+Excepteur sint occaecat cupidatat non proident.
+
+\begin{sustechcode}{C++}
+// Implementation code
+#include <vector>
+std::vector<int> data = {1, 2, 3, 4, 5};
+\end{sustechcode}
+
+\section{Experiments}
+Sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+\begin{sustechfiguregroup}
+  \begin{sustechsubfigure}[0.48\linewidth][Experiment A]
+    \sustechplaceholdergraphic[0.92\linewidth][3cm]
+  \end{sustechsubfigure}
+  \sustechfloatsep
+  \begin{sustechsubfigure}[0.48\linewidth][Experiment B]
+    \sustechplaceholdergraphic[0.92\linewidth][3cm]
+  \end{sustechsubfigure}
+  \caption{Experimental results comparison}
+\end{sustechfiguregroup}
+
+\section{Results}
+Lorem ipsum dolor sit amet.
+
+\section{Analysis}
+Consectetur adipiscing elit.
+
+\begin{sustechwarning}[title=Important Result]
+Analysis warning block — key finding.
+\end{sustechwarning}
+
+\section{Discussion}
+Sed do eiusmod tempor incididunt.
+
+\section{Ablation Study}
+Ut labore et dolore magna aliqua.
+
+\begin{sustechcode}{json}
+{
+  "ablation": true,
+  "component": "encoder",
+  "delta": -0.03
+}
+\end{sustechcode}
+
+\section{Limitations}
+Quis nostrud exercitation ullamco laboris.
+
+\section{Future Work}
+Nisi ut aliquip ex ea commodo consequat.
+
+\section{Related Applications}
+Duis aute irure dolor in reprehenderit.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{sustechpipelinediagram}
+    \sustechphasebox{s1}{at={(0,0)}}{Stage 1}
+    \sustechphasebox{s2}{right=of s1}{Stage 2}
+    \sustechphasebox{s3}{right=of s2}{Stage 3}
+  \end{sustechpipelinediagram}
+  \caption{Future work pipeline}
+\end{figure}
+
+\section{Conclusion}
+In voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
+\section{Acknowledgements}
+Excepteur sint occaecat cupidatat non proident sunt in culpa.
+
+\section{References}
+Qui officia deserunt mollit anim id est laborum.
+
+\section{Appendix A}
+Supplementary material.
+
+\begin{sustechcode}{yaml}
+appendix:
+  section: A
+  type: supplementary
+\end{sustechcode}
+
+\section{Appendix B}
+Additional experiments.
+
+\begin{itemize}
+  \item Additional result one
+  \item Additional result two
+  \item Additional result three
+\end{itemize}
+
+\begin{enumerate}
+  \item Step one of appendix procedure
+  \item Step two of appendix procedure
+\end{enumerate}
+
+\end{document}

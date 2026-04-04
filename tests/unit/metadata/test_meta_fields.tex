@@ -1,0 +1,22 @@
+% Tests all metadata commands appear in the compiled PDF.
+% !TEX program = xelatex
+\documentclass[titlepage=simple]{SUSTechHomework}
+
+\title{Metadata Fields Test}
+\author{UniqueAuthorFieldXYZ}
+\sid{12345678}
+\email{test@sustech.edu.cn}
+\coursecode{CS100}
+\coursename{Engineering Writing}
+\semester{Spring 2026}
+\instructor{Prof. TestInstructor}
+\department{Dept of CSE}
+\college{Shuren College}
+\reporttype{Lab Report}
+\date{2026-01-15}
+
+\begin{document}
+\maketitle
+\section{Content}
+All metadata fields should render on the title page.
+\end{document}

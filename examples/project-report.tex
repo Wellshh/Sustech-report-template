@@ -1,0 +1,83 @@
+% !TEX program = xelatex
+\documentclass[titlepage=formal,code=listings]{../SUSTechHomework}
+
+\title{Project Report Example}
+\coursecode{EE202}
+\coursename{Embedded Systems Design}
+\semester{Spring 2026}
+\instructor{Prof. Example}
+\reporttype{Course Project Report}
+\date{\today}
+\addbibresource{examples/project-report.bib}
+
+\begin{document}
+
+\clearauthors
+\addauthor{Alice Example}{12340001}{alice@example.com}{Department of Electronic and Electrical Engineering}{Zhixin College}{System Design}
+\addauthor{Bob Example}{12340002}{bob@example.com}{Department of Computer Science and Engineering}{Shuren College}{Software Integration}
+
+\clearcontributions
+\addcontribution{Alice Example}{Conceptualization, Hardware, Investigation}
+\addcontribution{Bob Example}{Software, Validation, Writing - Original Draft}
+
+\clearcredits
+\addcredit{Hardware}{Alice Example implemented the sensing and acquisition pipeline.}
+\addcredit{Software}{Bob Example integrated the control logic and visualization workflow.}
+
+\maketitle
+\tableofcontents
+
+\section{Introduction}
+
+This report demonstrates a complete project-style document with figures, code,
+math, references, and structured team metadata.
+
+\section{System Model}
+
+The controller state is modeled as
+\begin{align}
+  \vect{x}_{k+1} &= \mat{A}\vect{x}_k + \mat{B}\vect{u}_k, \\
+  \vect{y}_k &= \mat{C}\vect{x}_k.
+\end{align}
+
+The sampling interval is \qty{5}{\milli\second}, and the nominal current limit
+is \qty{1.5}{\ampere}.
+
+\section{Implementation}
+
+\begin{sustechcodeblock}{C++}[Controller Loop][src/controller.cpp][Main project control loop.][code:controller]
+for (int step = 0; step < max_steps; ++step) {
+    update_state();
+    apply_control();
+}
+\end{sustechcodeblock}
+
+The control loop in \sustechcoderef{code:controller} follows the structure
+recommended by \textcite{franklin-feedback}.
+
+\section{Results}
+
+\begin{sustechfiguregroup}
+  \begin{sustechsubfigure}[0.48\linewidth][Baseline]
+    \sustechplaceholdergraphic[0.92\linewidth][3cm]
+  \end{sustechsubfigure}
+  \sustechfloatsep
+  \begin{sustechsubfigure}[0.48\linewidth][Improved]
+    \sustechplaceholdergraphic[0.92\linewidth][3cm]
+  \end{sustechsubfigure}
+  \caption{Controller performance comparison}
+  \label{fig:project-results}
+\end{sustechfiguregroup}
+
+As shown in \cref{fig:project-results}, the tuned controller reduces overshoot.
+The reporting workflow also benefits from package guidance such as
+\parencite{ctan-biblatex}.
+
+\section{Conclusion}
+
+This project example is suitable as a starting point for lab reports, course
+projects, and team-based engineering writeups.
+
+\sustechprintbibliography
+
+\end{document}

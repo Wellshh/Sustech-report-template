@@ -1,0 +1,51 @@
+% Tests cleveref-based smart references and code-block references.
+% !TEX program = xelatex
+\documentclass{SUSTechHomework}
+
+\title{Smart Reference Test}
+\coursecode{REF}
+\coursename{Digital Reading}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{Target Section}\label{sec:target}
+
+\begin{equation}
+  E = mc^2
+  \label{eq:energy}
+\end{equation}
+
+\begin{figure}[htbp]
+  \centering
+  \fbox{\rule{0pt}{2.5cm}\rule{0.6\linewidth}{0pt}}
+  \caption{UniqueReferenceFigureCaption}
+  \label{fig:reference}
+\end{figure}
+
+\begin{table}[htbp]
+  \centering
+  \begin{tabular}{ll}
+    \sustechheaderrow
+    \sustechtableheader{Key} & \sustechtableheader{Value} \\
+    Ref & UniqueReferenceTableValue \\
+  \end{tabular}
+  \caption{UniqueReferenceTableCaption}
+  \label{tab:reference}
+\end{table}
+
+\begin{sustechcodeblock}{Python}[Reference Helper][src/ref.py][UniqueReferenceCodeCaption][code:reference]
+print("UniqueReferenceCodeBody")
+\end{sustechcodeblock}
+
+\section{Reference Summary}
+
+UniqueRefSection101 points to \cref{sec:target}.\\
+UniqueRefEquation102 points to \cref{eq:energy}.\\
+UniqueRefFigure103 points to \cref{fig:reference}.\\
+UniqueRefTable104 points to \cref{tab:reference}.\\
+UniqueRefCode105 points to \sustechcoderef{code:reference}.\\
+UniqueRefCapital106 points to \Cref{fig:reference}.
+
+\end{document}

@@ -1,0 +1,30 @@
+% Tests section / subsection / subsubsection heading hierarchy rendering.
+% !TEX program = xelatex
+\documentclass{SUSTechHomework}
+
+\title{Section Style Test}
+\coursecode{TEST}
+\coursename{Section Headings}
+
+\begin{document}
+\maketitle
+
+\section{Section Level One}
+Section level one body text.
+
+\subsection{Subsection Level Two}
+Subsection level two body text.
+
+\subsubsection{Subsubsection Level Three}
+Subsubsection level three body text.
+
+\section{Second Top-level Section}
+Checks spacing after previous section.
+
+\subsection{Maths in a Subsection}
+An inline equation \( E = mc^2 \) and a display equation:
+\[
+  \int_0^\infty e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}.
+\]
+
+\end{document}

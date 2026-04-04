@@ -1,0 +1,135 @@
+% Performance benchmark: TikZ-heavy document.
+% Measures the rendering cost of 6 engineering diagram templates.
+% Expected compile time: <= 60 s (two passes).
+% !TEX program = xelatex
+\documentclass{SUSTechHomework}
+
+\title{Perf Benchmark: TikZ Heavy}
+\coursecode{PERF}
+\coursename{Diagram Performance}
+
+\begin{document}
+\maketitle
+
+\section{Flowchart}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{sustechdiagram}
+    \node[sustech terminator] (start) {Start};
+    \node[sustech io, below=of start]           (input)  {Read Input};
+    \node[sustech process, below=of input]      (proc)   {Preprocess};
+    \node[sustech decision, below=14mm of proc] (check)  {Valid?};
+    \node[sustech process, below left=14mm and 20mm of check]  (retry) {Retry};
+    \node[sustech process, below right=14mm and 20mm of check] (run)   {Execute};
+    \node[sustech datastore, below=of run]      (store)  {Save Result};
+    \node[sustech terminator, below=of store]   (finish) {End};
+
+    \sustechconnect{start}{input}
+    \sustechconnect{input}{proc}
+    \sustechconnectwith{sustech highlight arrow}{proc}{check}
+    \sustechconnecttowith{sustech feedback arrow}[bend right=18][No]{check}{retry}
+    \sustechconnecttowith{sustech highlight arrow}[bend left=18][Yes]{check}{run}
+    \sustechconnect{run}{store}
+    \sustechconnect{store}{finish}
+    \sustechconnecttowith{sustech feedback arrow}[out=180,in=0,looseness=1.0][Loop]{retry}{input}
+  \end{sustechdiagram}
+  \caption{Flowchart benchmark figure}
+\end{figure}
+
+\section{System Block Diagram}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{sustechsystemdiagram}
+    \sustechmodulebox{ref}{at={(0,0)}}{Reference}
+    \sustechmodulebox{ctrl}{right=of ref}{Controller}
+    \sustechmodulebox{plant}{right=of ctrl}{Plant}
+    \sustechmodulebox[sustech datastore]{out}{right=of plant}{Output}
+    \node[sustech io, below=of plant] (sensor) {Sensor};
+
+    \sustechconnect{ref}{ctrl}
+    \sustechconnectwith{sustech highlight arrow}{ctrl}{plant}
+    \sustechconnect{plant}{out}
+    \sustechconnectto[out=-90,in=0][Measure]{plant}{sensor}
+    \sustechconnecttowith{sustech feedback arrow}[out=180,in=-90][Feedback]{sensor}{ctrl}
+  \end{sustechsystemdiagram}
+  \caption{System block diagram benchmark figure}
+\end{figure}
+
+\section{Pipeline Diagram}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{sustechpipelinediagram}
+    \sustechphasebox{raw}{at={(0,0)}}{Collect}
+    \sustechphasebox{clean}{right=of raw}{Clean}
+    \sustechphasebox{feat}{right=of clean}{Features}
+    \sustechphasebox{train}{right=of feat}{Train}
+    \sustechphasebox{eval}{right=of train}{Evaluate}
+    \node[sustech datastore, below=of train] (model) {Model};
+
+    \sustechconnect{raw}{clean}
+    \sustechconnect{clean}{feat}
+    \sustechconnectwith{sustech highlight arrow}{feat}{train}
+    \sustechconnect{train}{eval}
+    \sustechconnectto[out=-90,in=90][Save]{train}{model}
+    \sustechconnecttowith{sustech feedback arrow}[out=180,in=-90][Tune]{eval}{feat}
+  \end{sustechpipelinediagram}
+  \caption{Pipeline diagram benchmark figure}
+\end{figure}
+
+\section{Architecture Diagram}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{sustecharchitecturediagram}
+    \sustechmodulerow[sustech io]{inputs}{at={(0,0)}}{{Image},{Sensor},{Context}}
+    \sustechmodulerow[sustech layer]{backbone}{below=14mm of inputs-2}{Encoder,Fusion,Decoder}
+    \sustechmodulerow[sustech module]{outputs}{below=14mm of backbone-2}{{Detection},{State},{Report}}
+
+    \sustechconnect{inputs-1}{backbone-1}
+    \sustechconnect{inputs-2}{backbone-2}
+    \sustechconnect{inputs-3}{backbone-2}
+    \sustechconnect{backbone-1}{backbone-2}
+    \sustechconnectwith{sustech highlight arrow}{backbone-2}{backbone-3}
+    \sustechconnect{backbone-1}{outputs-1}
+    \sustechconnect{backbone-2}{outputs-2}
+    \sustechconnect{backbone-3}{outputs-3}
+  \end{sustecharchitecturediagram}
+  \caption{Architecture diagram benchmark figure}
+\end{figure}
+
+\section{Timeline}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{sustechoverviewtimeline}
+    \sustechtimelineaxis{(0,0)}{(6,0)}
+    \sustechtimelineevent{t1}{(0,0)}{Week 1}{Kick-off}
+    \sustechtimelineevent{t2}{(2,0)}{Week 3}{Prototype}
+    \sustechtimelineevent{t3}{(4,0)}{Week 6}{Validation}
+    \sustechtimelineevent{t4}{(6,0)}{Week 8}{Delivery}
+  \end{sustechoverviewtimeline}
+  \caption{Timeline benchmark figure}
+\end{figure}
+
+\section{Chain Diagram}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{sustechchaindiagram}
+    \sustechmodulerow[sustech device]{chain}{at={(0,0)}}{Sensor,Conditioning,DAQ,Controller,Actuator}
+    \node[sustech datastore, below=13mm of chain-3] (logger) {Logger};
+
+    \sustechconnect{chain-1}{chain-2}
+    \sustechconnect{chain-2}{chain-3}
+    \sustechconnectwith{sustech highlight arrow}{chain-3}{chain-4}
+    \sustechconnect{chain-4}{chain-5}
+    \sustechconnectto[out=-90,in=90][Store]{chain-3}{logger}
+    \sustechconnecttowith{sustech feedback arrow}[out=180,in=-90][Feedback]{chain-5}{chain-4}
+  \end{sustechchaindiagram}
+  \caption{Acquisition chain benchmark figure}
+\end{figure}
+
+\end{document}

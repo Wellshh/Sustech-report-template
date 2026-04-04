@@ -1,0 +1,38 @@
+% Tests sustechfiguregroup + sustechsubfigure with placeholder graphics.
+% !TEX program = xelatex
+\documentclass{SUSTechHomework}
+
+\title{Subfigure Group Test}
+\coursecode{TEST}
+\coursename{Diagram Subfigures}
+
+\begin{document}
+\maketitle
+
+\section{Two Subfigures}
+
+\begin{sustechfiguregroup}
+  \begin{sustechsubfigure}[0.48\linewidth][Baseline result]
+    \sustechplaceholdergraphic[0.92\linewidth][3cm]
+  \end{sustechsubfigure}
+  \sustechfloatsep
+  \begin{sustechsubfigure}[0.48\linewidth][Improved result]
+    \sustechplaceholdergraphic[0.92\linewidth][3cm]
+  \end{sustechsubfigure}
+  \caption{Two subfigures in one grouped figure — UniqueSubfigGroup401}
+\end{sustechfiguregroup}
+
+\section{Wide Figure with Aside}
+
+\sustechfigurewithaside
+  {\sustechplaceholdergraphic[0.95\linewidth][4cm]}
+  {
+    \begin{sustechaside}
+    \sustechasideheading{Interpretation}
+    \small
+    UniqueAsideContent402 — observations and reading guidance.
+    \end{sustechaside}
+  }
+  {Wide figure with explanatory aside panel}
+
+\end{document}

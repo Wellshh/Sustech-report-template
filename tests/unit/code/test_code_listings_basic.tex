@@ -1,0 +1,33 @@
+% Tests sustechcode environment with listings backend (Python).
+% !TEX program = xelatex
+\documentclass[code=listings]{SUSTechHomework}
+
+\title{Code Listings Basic Test}
+\coursecode{TEST}
+\coursename{Code Listings}
+
+\begin{document}
+\maketitle
+
+\section{Python Block}
+
+\begin{sustechcode}{Python}
+def greet(name: str) -> None:
+    # UniqueListingPython001
+    print(f"Hello, {name}!")
+
+greet("SUSTech")
+\end{sustechcode}
+
+\section{C++ Block}
+
+\begin{sustechcode}{C++}
+#include <iostream>
+// UniqueListingCpp002
+int main() {
+    std::cout << "Hello SUSTech" << std::endl;
+    return 0;
+}
+\end{sustechcode}
+
+\end{document}

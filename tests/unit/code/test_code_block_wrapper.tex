@@ -1,0 +1,30 @@
+\documentclass[code=listings]{SUSTechHomework}
+
+\title{Code Block Wrapper Test}
+\coursecode{TEST}
+\coursename{Code Block Wrapper}
+
+\begin{document}
+\maketitle
+
+\section{Wrapped Code Block}
+
+Reference: \sustechcoderef{code:wrapper-alpha}.
+
+\begin{sustechcodeblock}{Python}[Wrapper Demo][src/wrapper_demo.py][UniqueWrapperCaption401][code:wrapper-alpha]
+def wrapped_demo() -> str:
+    # UniqueWrapperBody402
+    return "UniqueWrapperBody402"
+\end{sustechcodeblock}
+
+\section{Anchor Only}
+
+\begin{sustechcodeblock}{json}[JSON Wrapper][][][code:wrapper-json]
+{
+  "marker": "UniqueWrapperJson403"
+}
+\end{sustechcodeblock}
+
+Anchor: \sustechcoderef{code:wrapper-json}.
+
+\end{document}

@@ -1,0 +1,18 @@
+.specstory/
+.vscode/
+.cursor/
+example.*
+!example.tex
+!example.pdf
+!example.bib
+/test_*.*
+/examples/*.aux
+/examples/*.bcf
+/examples/*.log
+/examples/*.out
+/examples/*.xml
+/examples/*.gz
+/examples/*.toc
+
+# Maintainer-only planning doc (not published with the repo)
+PLAN.md

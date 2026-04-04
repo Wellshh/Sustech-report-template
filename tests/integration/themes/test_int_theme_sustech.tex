@@ -1,0 +1,54 @@
+% Integration: default sustech theme with all branded color tokens.
+% Verifies: SUSTechPrimary, SUSTechAccent, SUSTechDark, boxes, code, table.
+% !TEX program = xelatex
+\documentclass[theme=sustech,code=listings]{SUSTechHomework}
+
+\title{SUSTech Theme Integration}
+\coursecode{INT301}
+\coursename{Theme Integration}
+\author{Test User}
+\sid{30001}
+
+\begin{document}
+\maketitle
+
+\section{Color Tokens}
+
+\textcolor{SUSTechPrimary}{Primary green text.}
+\textcolor{SUSTechAccent}{Accent orange text.}
+\textcolor{SUSTechDark}{Dark neutral text.}
+\textcolor{SUSTechMuted}{Muted secondary text.}
+
+\section{Boxes}
+
+\begin{sustechnote}[title=Note in Default Theme]
+UniqueThemeSUSTechNote901
+\end{sustechnote}
+
+\begin{sustechwarning}[title=Warning in Default Theme]
+UniqueThemeSUSTechWarn902
+\end{sustechwarning}
+
+\section{Code in Default Theme}
+
+\begin{sustechcode}{Python}
+# UniqueThemeCode903
+print("SUSTech theme integration test")
+\end{sustechcode}
+
+\section{Table in Default Theme}
+
+\begin{table}[htbp]
+  \centering
+  \begin{tabular}{ll}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{Key} & \sustechtableheader{Value} \\
+    \midrule
+    Theme & sustech \\
+    \bottomrule
+  \end{tabular}
+  \caption{Default theme table — UniqueThemeTable904}
+\end{table}
+
+\end{document}

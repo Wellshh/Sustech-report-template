@@ -1,0 +1,13 @@
+% \mktitle must apply PDF metadata like \maketitle (regression).
+% !TEX program = xelatex
+\documentclass[titlepage=simple]{SUSTechHomework}
+
+\title{mktitle Metadata}
+\coursecode{TEST}
+\coursename{Metadata}
+
+\begin{document}
+\mktitle
+\section{After custom title}
+Content.
+\end{document}

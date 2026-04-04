@@ -1,0 +1,12 @@
+% Unknown class options should warn and fall back, not abort.
+% !TEX program = xelatex
+\documentclass[code=unknownbackend,theme=notatheme,titlepage=invalid,lang=klingon]{SUSTechHomework}
+
+\title{Invalid Options}
+\coursecode{TEST}
+\coursename{Fallback}
+
+\begin{document}
+\maketitle
+Fallback paths exercised.
+\end{document}

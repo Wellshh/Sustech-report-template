@@ -1,0 +1,39 @@
+% Integration: 5-author formal title page — boundary test for author list layout.
+% !TEX program = xelatex
+\documentclass[titlepage=formal]{SUSTechHomework}
+
+\title{Five Author Team Report}
+\coursecode{INT201}
+\coursename{Integration Stress Test}
+\semester{Fall 2026}
+\instructor{Prof. MultiTest}
+
+\begin{document}
+
+\clearauthors
+\addauthor{Author One}{20001}{a1@sustech.edu.cn}{CSE}{Shuren}{Writing}
+\addauthor{Author Two}{20002}{a2@sustech.edu.cn}{EE}{Shuren}{Code}
+\addauthor{Author Three}{20003}{a3@sustech.edu.cn}{ME}{Shuren}{Analysis}
+\addauthor{Author Four}{20004}{a4@sustech.edu.cn}{CS}{Shuren}{Testing}
+\addauthor{Author Five}{20005}{a5@sustech.edu.cn}{Math}{Shuren}{Review}
+
+\clearcontributions
+\addcontribution{Author One}{Conceptualization, Writing - Original Draft}
+\addcontribution{Author Two}{Software, Methodology}
+\addcontribution{Author Three}{Formal Analysis, Data Curation}
+\addcontribution{Author Four}{Validation, Testing}
+\addcontribution{Author Five}{Supervision, Review and Editing}
+
+\clearcredits
+\addcredit{Writing}{Author One drafted and organized the report.}
+\addcredit{Implementation}{Author Two built the software components.}
+
+\maketitle
+
+\section{Introduction}
+Five-author boundary-condition integration test.
+
+\section{Methods}
+Page two — header should show ``Author One et al.''.
+
+\end{document}

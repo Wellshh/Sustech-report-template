@@ -1,0 +1,57 @@
+% Tests sustechsystemdiagram, sustecharchitecturediagram, sustechchaindiagram.
+% !TEX program = xelatex
+\documentclass{SUSTechHomework}
+
+\title{System Diagram Test}
+\coursecode{TEST}
+\coursename{System Diagrams}
+
+\begin{document}
+\maketitle
+
+\section{System Block Diagram}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{sustechsystemdiagram}
+    \sustechmodulebox{inp}{at={(0,0)}}{Input Signal}
+    \sustechmodulebox{ctrl}{right=of inp}{Controller}
+    \sustechmodulebox{plant}{right=of ctrl}{Plant}
+    \sustechmodulebox[sustech datastore]{out}{right=of plant}{Output}
+    \node[sustech io, below=of plant] (sensor) {Sensor};
+
+    \sustechconnect{inp}{ctrl}
+    \sustechconnectwith{sustech highlight arrow}{ctrl}{plant}
+    \sustechconnectto[out=-90,in=0][Measure]{plant}{sensor}
+    \sustechconnecttowith{sustech feedback arrow}[out=180,in=-90][Feedback]{sensor}{ctrl}
+  \end{sustechsystemdiagram}
+  \caption{Control system block diagram — UniqueSystemDiag701}
+\end{figure}
+
+\section{Architecture Diagram}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{sustecharchitecturediagram}
+    \sustechmodulerow[sustech io]{inputs}{at={(0,0)}}
+      {{Image\\Input},{Sensor\\Stream}}
+    \sustechmodulerow[sustech layer]{backbone}{below=14mm of inputs-1}
+      {Encoder,Decoder}
+    \sustechmodulerow[sustech module]{outputs}{below=14mm of backbone-1}
+      {{Detection\\Head},{Report\\Output}}
+  \end{sustecharchitecturediagram}
+  \caption{Neural architecture diagram — UniqueArchDiag702}
+\end{figure}
+
+\section{Chain Diagram}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{sustechchaindiagram}
+    \sustechmodulerow[sustech device]{chain}{at={(0,0)}}
+      {Sensor,Signal Cond.,DAQ,Controller,Actuator}
+  \end{sustechchaindiagram}
+  \caption{Acquisition chain — UniqueChainDiag703}
+\end{figure}
+
+\end{document}

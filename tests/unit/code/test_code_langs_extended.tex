@@ -1,0 +1,73 @@
+% Tests [Modern]C++, [SUSTech]MATLAB, enhanced YAML, and diff language definitions.
+% !TEX program = xelatex
+\documentclass[code=listings]{SUSTechHomework}
+
+\title{Extended Language Definitions Test}
+\coursecode{TEST}
+\coursename{Code Language Definitions}
+
+\begin{document}
+\maketitle
+
+\section{Modern C++}
+
+\begin{sustechcode}{moderncpp}
+// UniqueModernCpp701
+#include <memory>
+#include <concepts>
+
+template<typename T>
+concept Printable = requires(T x) { (void)x; };
+
+auto main() -> int {
+    auto ptr = std::make_unique<int>(42);
+    constexpr bool flag = true;
+    nullptr == ptr ? flag : !flag;
+    return 0;
+}
+\end{sustechcode}
+
+\section{MATLAB}
+
+\begin{sustechcode}{matlab}
+% UniqueMatlabLang702
+function y = compute(x)
+    n = numel(x);
+    mu = mean(x);
+    sigma = std(x);
+    y = (x - mu) / sigma;
+    figure;
+    plot(y);
+    grid on;
+end
+\end{sustechcode}
+
+\section{Enhanced YAML}
+
+\begin{sustechcode}{yaml}
+# UniqueYamlBool703
+defaults: &base
+  enabled: true
+  debug:   false
+  value:   null
+
+production:
+  <<: *base
+  enabled: true
+  replicas: 3
+\end{sustechcode}
+
+\section{Diff Language}
+
+\begin{sustechdiff}
+--- a/old.py
++++ b/new.py
+@@ -1,4 +1,5 @@
+-# UniqueOldMarker
++# UniqueDiffLang704
+ def run():
+-    pass
++    return True
+\end{sustechdiff}
+
+\end{document}

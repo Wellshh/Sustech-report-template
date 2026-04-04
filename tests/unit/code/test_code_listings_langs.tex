@@ -1,0 +1,33 @@
+% Tests json and yaml language definitions bundled in the class.
+% !TEX program = xelatex
+\documentclass[code=listings]{SUSTechHomework}
+
+\title{Code Language Support Test}
+\coursecode{TEST}
+\coursename{JSON and YAML}
+
+\begin{document}
+\maketitle
+
+\section{JSON}
+
+\begin{sustechcode}{json}
+{
+  "project": "SUSTechHomework",
+  "version": "UniqueJsonValue101",
+  "features": ["listings", "minted", "tikz"]
+}
+\end{sustechcode}
+
+\section{YAML}
+
+\begin{sustechcode}{yaml}
+project: SUSTechHomework
+version: UniqueYamlValue102
+# A comment line
+features:
+  - listings
+  - minted
+\end{sustechcode}
+
+\end{document}

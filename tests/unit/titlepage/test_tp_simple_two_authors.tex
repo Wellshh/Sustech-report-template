@@ -1,0 +1,16 @@
+% Simple title page: team label and header author line for multiple authors.
+% !TEX program = xelatex
+\documentclass[titlepage=simple]{SUSTechHomework}
+
+\title{Simple Two Authors}
+\coursecode{TEST}
+\coursename{Maketitle}
+
+\begin{document}
+\clearauthors
+\addauthor{First}{11}{f@example.com}{}{}{}
+\addauthor{Second}{22}{s@example.com}{}{}{}
+\maketitle
+\section{X}
+Second page checks header ``et al.'' and running title.
+\end{document}

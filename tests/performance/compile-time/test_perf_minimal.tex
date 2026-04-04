@@ -1,0 +1,22 @@
+% Performance baseline: minimal document.
+% Measures the base overhead of loading the class with no features.
+% Expected compile time: <= 20 s (two passes, no bibliography).
+% !TEX program = xelatex
+\documentclass{SUSTechHomework}
+
+\title{Perf Baseline: Minimal}
+\coursecode{PERF}
+\coursename{Performance Benchmark}
+
+\begin{document}
+\maketitle
+
+\section{Baseline}
+
+This document loads the class with default options and compiles a single section.
+It measures the fixed cost of the class preamble (fontspec, xeCJK, tcolorbox,
+tikz, and all other unconditionally-loaded packages).
+
+The body is intentionally empty to isolate package-loading time.
+
+\end{document}

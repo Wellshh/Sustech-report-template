@@ -1,0 +1,28 @@
+% Stress: very long title and course name to test line-breaking in title layouts.
+% !TEX program = xelatex
+\documentclass[titlepage=formal]{SUSTechHomework}
+
+\title{A Very Long Report Title That Tests How the Title Page Handles Line Breaking
+       and Multi-line Display in the SUSTech Homework Template System}
+\coursecode{STRESS002}
+\coursename{An Extremely Comprehensive Course on Engineering Report Writing
+            Methodology and Academic Document Preparation at SUSTech}
+\author{Author With A Rather Long Full Name}
+\sid{00000002}
+\email{averylongemailaddress@department.sustech.edu.cn}
+\semester{Spring \& Summer 2026}
+\instructor{Prof. With A Long Name / Dr. Assistant}
+\department{Department of Computer Science and Engineering}
+\college{College of Engineering with Extended Title}
+\reporttype{Comprehensive Final Project Report}
+
+\begin{document}
+\maketitle
+
+\section{Body Content After Long Title}
+The title page layout should gracefully wrap all long fields.
+
+\subsection{Verification}
+If this compiles without overflow warnings, the long-title handling is robust.
+
+\end{document}

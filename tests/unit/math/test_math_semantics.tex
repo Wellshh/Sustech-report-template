@@ -1,0 +1,35 @@
+% Tests semantic math helpers and SI unit support.
+% !TEX program = xelatex
+\documentclass{SUSTechHomework}
+
+\title{Math Semantics Test}
+\coursecode{MATH}
+\coursename{Engineering Math}
+
+\begin{document}
+\maketitle
+
+\section{Units}
+
+UniqueMathQty101 reports the acceleration as \qty{9.81}{\meter\per\second\squared}.
+UniqueMathNum102 records the damping ratio as \num{1.25e-3}.
+
+\section{Semantic Math}
+
+UniqueMathVect103 uses semantic vector and matrix helpers:
+\[
+  \mat{A}^{\trans}\vect{x} = \vect{b}.
+\]
+
+UniqueMathNorm104 verifies paired delimiters:
+\[
+  \norm*{\vect{x}}_2 \le \abs*{\alpha} + \qty{2.5}{\newton}.
+\]
+
+UniqueMathDiff105 validates exponential and differential primitives:
+\begin{align}
+  y(t) &= \e^{-t}\sin(\omega t), \\
+  E &= \int_0^T y(t)\,\diff t.
+\end{align}
+
+\end{document}

@@ -1,0 +1,57 @@
+% Tests \sustechheaderrow, \sustechtableheader, \sustechthead table style commands.
+% !TEX program = xelatex
+\documentclass{SUSTechHomework}
+
+\title{Table Style Test}
+\coursecode{TEST}
+\coursename{Table Styles}
+
+\begin{document}
+\maketitle
+
+\section{Styled Table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Styled table with branded header}
+  \begin{tabular}{lll}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{UniqueColAlpha} &
+    \sustechtableheader{UniqueColBeta} &
+    \sustechtableheader{UniqueColGamma} \\
+    \midrule
+    Row one A  & Row one B  & Row one C  \\
+    Row two A  & Row two B  & Row two C  \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{Paired Subtable Group}
+
+\begin{sustechtablegroup}
+  \begin{sustechsubtable}[0.46\linewidth][Experiment A]
+    \begin{tabular}{ll}
+      \toprule
+      \sustechheaderrow
+      \sustechtableheader{Metric} & \sustechtableheader{Value} \\
+      \midrule
+      Accuracy & 91\% \\
+      \bottomrule
+    \end{tabular}
+  \end{sustechsubtable}
+  \sustechfloatsep
+  \begin{sustechsubtable}[0.46\linewidth][Experiment B]
+    \begin{tabular}{ll}
+      \toprule
+      \sustechheaderrow
+      \sustechtableheader{Metric} & \sustechtableheader{Value} \\
+      \midrule
+      Accuracy & 94\% \\
+      \bottomrule
+    \end{tabular}
+  \end{sustechsubtable}
+  \caption{Paired subtable group}
+\end{sustechtablegroup}
+
+\end{document}

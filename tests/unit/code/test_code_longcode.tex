@@ -1,0 +1,67 @@
+% Tests sustechlongcode and sustechlongshell environments.
+% The break mechanism is compile-time and layout-dependent, so these tests
+% verify: (1) compilation succeeds, (2) the unique markers appear in the PDF,
+% (3) the title line is present.
+% !TEX program = xelatex
+\documentclass[code=listings]{SUSTechHomework}
+
+\title{Long Code Block Test}
+\coursecode{TEST}
+\coursename{Long Code Pagination}
+
+\begin{document}
+\maketitle
+
+\section{Long Code --- Python}
+
+\begin{sustechlongcode}{Python}[Pagination Fixture][tests/unit/code/fixture.py]
+"""
+UniqueLongCode801 - this marker must appear in the rendered PDF.
+Long code fixture to exercise the sustechlongcode environment.
+"""
+import sys
+
+def step_one(data):
+    return [x * 2 for x in data]
+
+def step_two(data):
+    return [x + 1 for x in data]
+
+def step_three(data):
+    total = sum(data)
+    return total / max(len(data), 1)
+
+def pipeline(raw):
+    a = step_one(raw)
+    b = step_two(a)
+    return step_three(b)
+
+if __name__ == "__main__":
+    sample = list(range(20))
+    result = pipeline(sample)
+    print(f"Result: {result}")
+    sys.exit(0)
+\end{sustechlongcode}
+
+\section{Long Shell --- Build Log}
+
+\begin{sustechlongshell}[Build Output][terminal://build]
+$ xelatex -interaction=batchmode example.tex
+This is XeTeX, Version 3.141592653 (TeX Live 2024)
+ restricted \write18 enabled.
+entering extended mode
+(example.tex
+LaTeX2e <2023-11-01> patch level 1
+(./SUSTechHomework.cls
+Document Class: SUSTechHomework
+Package xeCJK loaded.
+Package fontspec loaded.
+)
+(example.aux)
+[1] [2] [3]
+Output written on example.pdf (3 pages, 112345 bytes).
+# UniqueLongShell802
+Transcript written on example.log.
+\end{sustechlongshell}
+
+\end{document}

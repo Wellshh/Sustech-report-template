@@ -1,0 +1,27 @@
+% Tests \code{} inline code macro rendering.
+% !TEX program = xelatex
+\documentclass{SUSTechHomework}
+
+\title{Inline Code Test}
+\coursecode{TEST}
+\coursename{Inline Code}
+
+\begin{document}
+\maketitle
+
+\section{Inline Code in Running Text}
+
+Call \code{UniqueInlineCode301} to trigger the process.
+Use \code{pip install sustech-tools} to install the package.
+The variable \code{max\_retries = 3} controls retry logic.
+
+\section{Mixed Inline and Block}
+
+After running \code{xelatex example.tex}, check the output.
+
+\begin{sustechcode}{Python}
+# Code block after inline usage
+result = "UniqueInlineMixed302"
+\end{sustechcode}
+
+\end{document}

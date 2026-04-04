@@ -1,0 +1,23 @@
+% Formal title must render BOTH CRediT block and credit summary when both are set.
+% !TEX program = xelatex
+\documentclass[titlepage=formal]{SUSTechHomework}
+
+\title{Dual Metadata Title Page}
+\coursecode{TEST}
+\coursename{Maketitle}
+\semester{2026}
+\instructor{Prof.\,X}
+
+\begin{document}
+\clearauthors
+\addauthor{Alpha}{001}{}{}{}{}
+\addauthor{Beta}{002}{}{}{}{}
+\clearcontributions
+\addcontribution{Alpha}{Writing - Original Draft}
+\addcontribution{Beta}{Validation}
+\clearcredits
+\addcredit{Narrative note}{UniqueMarkerDualMetaXYZ}
+\maketitle
+\section{After title}
+Body.
+\end{document}

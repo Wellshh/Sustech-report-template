@@ -1,0 +1,37 @@
+% Tests branded itemize and enumerate list styling.
+% !TEX program = xelatex
+\documentclass{SUSTechHomework}
+
+\title{List Style Test}
+\coursecode{TEST}
+\coursename{List Styles}
+
+\begin{document}
+\maketitle
+
+\section{Itemize}
+
+\begin{itemize}
+  \item First bullet item UniqBulletAlpha
+  \item Second bullet item UniqBulletBeta
+  \item Third bullet item UniqBulletGamma
+\end{itemize}
+
+\section{Enumerate}
+
+\begin{enumerate}
+  \item First numbered item UniqEnumAlpha
+  \item Second numbered item UniqEnumBeta
+  \item Third numbered item UniqEnumGamma
+\end{enumerate}
+
+\section{Nested}
+
+\begin{itemize}
+  \item Top level UniqNestTop
+  \begin{itemize}
+    \item Nested level UniqNestInner
+  \end{itemize}
+\end{itemize}
+
+\end{document}

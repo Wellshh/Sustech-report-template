@@ -1,0 +1,52 @@
+% Integration: theme=light palette override – all visual elements in light mode.
+% !TEX program = xelatex
+\documentclass[theme=light,code=listings]{SUSTechHomework}
+
+\title{Light Theme Integration}
+\coursecode{INT302}
+\coursename{Light Theme Integration}
+\author{Test User}
+\sid{30002}
+
+\begin{document}
+\maketitle
+
+\section{Color Tokens (light overrides)}
+
+\textcolor{SUSTechPrimary}{Primary green — unchanged in light.}
+\textcolor{SUSTechAccent}{Accent orange — unchanged in light.}
+\textcolor{SUSTechDark}{Dark neutral — softer in light.}
+
+\section{Boxes in Light Mode}
+
+\begin{sustechnote}[title=Note in Light Theme]
+UniqueThemeLightNote911
+\end{sustechnote}
+
+\begin{sustechwarning}[title=Warning in Light Theme]
+UniqueThemeLightWarn912
+\end{sustechwarning}
+
+\section{Code in Light Mode}
+
+\begin{sustechcode}{Python}
+# UniqueThemeLightCode913
+x = "light theme"
+\end{sustechcode}
+
+\section{Table in Light Mode}
+
+\begin{table}[htbp]
+  \centering
+  \begin{tabular}{ll}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{Key} & \sustechtableheader{Value} \\
+    \midrule
+    Theme & light \\
+    \bottomrule
+  \end{tabular}
+  \caption{Light theme table — UniqueThemeLightTable914}
+\end{table}
+
+\end{document}

@@ -1,0 +1,47 @@
+% Tests sustechdiff (inline) and sustechdiffblock (captioned) environments.
+% !TEX program = xelatex
+\documentclass[code=listings]{SUSTechHomework}
+
+\title{Diff Block Environment Test}
+\coursecode{TEST}
+\coursename{Diff Environments}
+
+\begin{document}
+\maketitle
+
+\section{Inline Diff}
+
+\begin{sustechdiff}
+--- a/old.py
++++ b/new.py
+@@ -1,6 +1,7 @@
+ class Config:
+-    TIMEOUT = 30
++    TIMEOUT = 60
++    MAX_RETRIES = 3
+ 
+-    def validate(self):
+-        return self.TIMEOUT > 0
++    def validate(self) -> bool:
++        # UniqueDiffEnv901
++        return self.TIMEOUT > 0 and self.MAX_RETRIES >= 1
+\end{sustechdiff}
+
+\section{Captioned Diff Block}
+
+\begin{sustechdiffblock}[DiffCaption903: Rename helper][src/util.py][Rename the helper and fix its return type.][code:diff-block-test]
+--- a/src/util.py
++++ b/src/util.py
+@@ -1,5 +1,6 @@
+-def helper(x):
+-    return x
++def compute(x: float) -> float:
++    # UniqueDiffBlock902
++    return float(x)
+ 
+ if __name__ == "__main__":
+-    helper(1)
++    print(compute(1))
+\end{sustechdiffblock}
+
+\end{document}

@@ -1,0 +1,36 @@
+% Integration: 3-author formal title page with contributions and credits.
+% Verifies: multi-author aggregation, et al. header, contribution blocks.
+% !TEX program = xelatex
+\documentclass[titlepage=formal]{SUSTechHomework}
+
+\title{Three Author Team Report}
+\coursecode{INT101}
+\coursename{Integration Test}
+\semester{Spring 2026}
+\instructor{Prof. Integration}
+
+\begin{document}
+
+\clearauthors
+\addauthor{UniqueAlice}{10001}{alice@sustech.edu.cn}{CSE}{Shuren}{Lead}
+\addauthor{UniqueBob}{10002}{bob@sustech.edu.cn}{EE}{Shuren}{Support}
+\addauthor{UniqueCarol}{10003}{carol@sustech.edu.cn}{ME}{Shuren}{Support}
+
+\clearcontributions
+\addcontribution{UniqueAlice}{Conceptualization, Writing - Original Draft}
+\addcontribution{UniqueBob}{Investigation, Validation}
+\addcontribution{UniqueCarol}{Visualization, Data Curation}
+
+\clearcredits
+\addcredit{Writing}{UniqueAlice led the writing and final editing.}
+\addcredit{Experiments}{UniqueBob and UniqueCarol ran experiments.}
+
+\maketitle
+
+\section{Introduction}
+Three-author integration test body.
+
+\section{More Content}
+Second page to verify the ``et al.'' header line.
+
+\end{document}

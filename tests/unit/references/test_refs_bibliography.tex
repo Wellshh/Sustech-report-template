@@ -1,0 +1,24 @@
+% Tests biblatex + biber integration and bibliography rendering.
+% !TEX program = xelatex
+\documentclass{SUSTechHomework}
+
+\title{Bibliography Backend Test}
+\coursecode{BIB}
+\coursename{Reference Pipeline}
+\addbibresource{tests/unit/references/test_refs_bibliography.bib}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{Citation Check}
+
+UniqueBibCite101 cites a paper with a DOI: \textcite{shannon1948test}.\\
+UniqueBibCite102 cites an online source: \parencite{ctanbiblatextest}.\\
+UniqueBibCite103 cites a repository-like online entry: \parencite{pygmentstest}.
+
+\section{Bibliography Output}
+
+\sustechprintbibliography
+
+\end{document}

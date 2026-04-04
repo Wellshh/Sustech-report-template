@@ -1,0 +1,36 @@
+% !TEX program = xelatex
+% Class file lives in repository root; path is relative to this .tex file's directory.
+\documentclass[titlepage=simple,code=listings]{../SUSTechHomework}
+
+\title{Minimal Homework Example}
+\author{Example Student}
+\sid{12345678}
+\email{student@example.com}
+\coursecode{CS101}
+\coursename{Introduction to Engineering Computing}
+\semester{Spring 2026}
+\instructor{Prof. Example}
+\department{Department of Computer Science and Engineering}
+\college{Shuren College}
+\reporttype{Homework}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Problem Statement}
+
+This minimal example is intended for fast homework setup.
+
+\section{Result}
+
+The measured acceleration is \qty{9.81}{\meter\per\second\squared}.
+
+\begin{sustechcodeblock}{Python}[Quick Script][src/solve.py][Minimal code example.][code:minimal]
+def square(x: int) -> int:
+    return x * x
+\end{sustechcodeblock}
+
+See \sustechcoderef{code:minimal} for the attached code block.
+
+\end{document}

@@ -1,0 +1,47 @@
+% Tests sustechdiagram with all node types and arrow styles.
+% !TEX program = xelatex
+\documentclass{SUSTechHomework}
+
+\title{Engineering Diagram Test}
+\coursecode{TEST}
+\coursename{Engineering Diagrams}
+
+\begin{document}
+\maketitle
+
+\section{Flowchart with Decision}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{sustechdiagram}
+    \node[sustech terminator] (start) {Start};
+    \node[sustech io, below=of start]      (input)  {Collect Data};
+    \node[sustech process, below=of input] (clean)  {Clean Samples};
+    \node[sustech decision, below=14mm of clean] (check) {Quality OK?};
+    \node[sustech process, below=14mm of check] (train)  {Train Model};
+    \node[sustech terminator, below=of train]   (end)   {End};
+
+    \sustechconnect{start}{input}
+    \sustechconnect{input}{clean}
+    \sustechconnectwith{sustech highlight arrow}{clean}{check}
+    \sustechconnecttowith{sustech highlight arrow}[bend left=10][Yes]{check}{train}
+    \sustechconnect{train}{end}
+  \end{sustechdiagram}
+  \caption{Engineering flowchart — UniqueFlowChart501}
+\end{figure}
+
+\section{Data Store Node}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{sustechdiagram}
+    \node[sustech process]   (proc)  {Processor};
+    \node[sustech datastore, right=of proc] (db) {Database};
+    \node[sustech note node, above=of db]   (note) {Cache layer};
+    \sustechconnectwith{sustech highlight arrow}{proc}{db}
+    \sustechconnectwith{sustech auxiliary arrow}{db}{note}
+  \end{sustechdiagram}
+  \caption{Data store and auxiliary arrow — UniqueDataStore502}
+\end{figure}
+
+\end{document}

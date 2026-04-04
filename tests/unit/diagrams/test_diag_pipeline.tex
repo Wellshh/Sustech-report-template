@@ -1,0 +1,40 @@
+% Tests sustechpipelinediagram + sustechphasebox.
+% !TEX program = xelatex
+\documentclass{SUSTechHomework}
+
+\title{Pipeline Diagram Test}
+\coursecode{TEST}
+\coursename{Pipeline Diagrams}
+
+\begin{document}
+\maketitle
+
+\section{Linear Pipeline}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{sustechpipelinediagram}
+    \sustechphasebox{p1}{at={(0,0)}}{Collect}
+    \sustechphasebox{p2}{right=of p1}{Clean}
+    \sustechphasebox{p3}{right=of p2}{Extract}
+    \sustechphasebox{p4}{right=of p3}{Train}
+    \sustechphasebox{p5}{right=of p4}{Evaluate}
+  \end{sustechpipelinediagram}
+  \caption{Linear ML pipeline — UniquePipeline601}
+\end{figure}
+
+\section{Timeline}
+
+\begin{figure}[htbp]
+  \centering
+  \begin{sustechoverviewtimeline}
+    \sustechtimelineaxis{(0,0)}{(6,0)}
+    \sustechtimelineevent{ev1}{(0,0)}{Week 1}{Kickoff}
+    \sustechtimelineevent{ev2}{(2,0)}{Week 3}{Milestone 1}
+    \sustechtimelineevent{ev3}{(4,0)}{Week 6}{Milestone 2}
+    \sustechtimelineevent{ev4}{(6,0)}{Week 8}{Delivery}
+  \end{sustechoverviewtimeline}
+  \caption{Project timeline — UniqueTimeline602}
+\end{figure}
+
+\end{document}
