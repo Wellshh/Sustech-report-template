@@ -1,0 +1,602 @@
+% Continuation: R4, R5, references, appendix (included by report.tex)
+
+\section{R4: Evaluation --- Non-Collaborative Baseline}
+
+\subsection{Evaluation Metrics}
+
+The following metrics are used to evaluate agent performance:
+
+\begin{table}[htbp]
+  \centering
+  \caption{Evaluation metrics}
+  \begin{tabular}{lp{0.62\linewidth}}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{Metric} & \sustechtableheader{Description} \\
+    \midrule
+    \textbf{Completion Time} & Total ticks from simulation start until all holes are filled (or max ticks reached) \\
+    \textbf{Total Score} & Sum of rewards from all filled holes \\
+    \textbf{Reward Efficiency} & Total score divided by completion ticks (score per tick) \\
+    \textbf{Safety Rate} & Percentage of agents that never run out of energy during the simulation \\
+    \textbf{Path Efficiency} & Ratio of actual distance traveled to theoretical shortest path \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Single-Expectimax Utility (SEU) Function}
+
+Following the original Tileworld formulation (Pollack \& Ringuette, 1990), the reward-based task selection strategy uses a \textbf{Single-Expectimax Utility (SEU)} function to evaluate and rank potential tasks. The SEU function combines expected reward with expected cost:
+
+\begin{verbatim}
+SEU(task) = E[Reward] - ExpectedCost
+\end{verbatim}
+
+Where the utility calculation incorporates:
+
+\begin{enumerate}
+  \item \textbf{Reward Component}: The hole's score value (1--10 points)
+  \item \textbf{Travel Cost}: Estimated distance to complete the task chain (acquire tile $\to$ fill hole)
+  \item \textbf{Energy Risk}: Post-task energy margin after completing the task and reaching nearest station
+  \item \textbf{Switching Penalty}: Penalty for abandoning current target to pursue a new one (prevents thrashing)
+\end{enumerate}
+
+The implementation in \texttt{ContractNetBoard} uses a weighted formula:
+
+\begin{verbatim}
+Utility = w_score x norm(score)
+        + w_hold  x (already_holding_tile ? 1 : 0)
+        - w_dist  x norm(distance)
+        - w_risk  x risk(slack)
+        - w_switch x switchPenalty
+\end{verbatim}
+
+This SEU-based selection is compared against a \textbf{First-Available} baseline that selects the first unclaimed hole encountered, regardless of distance, reward, or energy feasibility.
+
+\subsection{Experimental Setup}
+
+\subsubsection{Parameter Configurations}
+
+The implementation provides four predefined environment profiles via \texttt{EnvironmentConfig.java}:
+
+\begin{table}[htbp]
+  \centering
+  \footnotesize
+  \caption{Predefined environment profiles}
+  \begin{tabular}{lcccc}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{Parameter} & \sustechtableheader{BASELINE} & \sustechtableheader{FAST\_CHANGE} & \sustechtableheader{LONG\_RANGE} & \sustechtableheader{CUSTOM} \\
+    \midrule
+    Grid Size & $100{\times}100$ & $50{\times}50$ & $150{\times}40$ & $100{\times}100$ \\
+    Wind Interval & 20 ticks & 10 ticks & 40 ticks & 20 ticks \\
+    Max Ticks & 5000 & 5000 & 5000 & 5000 \\
+    Agent Sensing Range & 15 & 10 & 18 & 5 \\
+    Energy Stations & 8 & 4 & 9 & 1 \\
+    Agent Max Energy & 260 & 170 & 320 & 100 \\
+    Low Energy Threshold & 110 & 65 & 140 & 20 \\
+    Random Seed & 999 & 42 & 123 & 42 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+For R4 evaluation, we use the \textbf{BASELINE} profile as the default configuration and vary specific parameters to test sensitivity:
+
+\begin{table}[htbp]
+  \centering
+  \caption{R4 sensitivity parameters}
+  \begin{tabular}{lcc}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{Parameter} & \sustechtableheader{Baseline Value} & \sustechtableheader{Variations} \\
+    \midrule
+    Number of Agents & 5 & 3, 7, 10 \\
+    Number of Holes & 10 & 5, 15, 20 \\
+    Number of Obstacles & 15 & 5, 25, 40 \\
+    Number of Tiles & Equal to holes & --- \\
+    Wind Interval & 20 & 10 (fast), 50 (slow), $\infty$ (static) \\
+    Max Ticks & 5000 & --- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{Experimental Procedure}
+
+\begin{itemize}
+  \item 10 independent runs per configuration
+  \item All results reported as average $\pm$ standard deviation
+  \item Contract Net coordination disabled for baseline evaluation (R4)
+  \item Random seed varied across runs for statistical robustness
+\end{itemize}
+
+\subsection{Results: Reward-Based vs First-Available Selection}
+
+\tileworldfigure{Completion time comparison between First-Available and Reward-Based strategies across different configurations. Lower is better; * indicates the winner.}{assets/r4_completion_time.png}{fig:r4-time}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Average completion time (ticks)}
+  \begin{tabular}{p{0.34\linewidth}ccc}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{Configuration} & \sustechtableheader{First-Avail.} & \sustechtableheader{Reward-Based} & \sustechtableheader{Winner} \\
+    \midrule
+    Baseline ($50{\times}50$, 5 agents, 15 obstacles) & 1309.1 & 1450.9 & First-Available \\
+    Low obstacles (5) & 844.5 & 538.3 & \textbf{Reward-Based} \\
+    High obstacles (40) & 974.1 & 376.0 & \textbf{Reward-Based} \\
+    Fast wind (10 ticks) & 1059.2 & 1424.3 & First-Available \\
+    Static environment & 5000.0 (4.0 holes left) & 5000.0 (2.4 holes left) & Reward-Based (more complete) \\
+    3 agents & 964.9 & 1364.9 & First-Available \\
+    10 agents & 550.7 & 347.2 & \textbf{Reward-Based} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\textbf{Key finding}: The advantage of reward-based selection is \textbf{context-dependent}: high obstacle density and more agents favor Reward-Based; baseline and fewer agents favor First-Available.
+
+\tileworldfigure{Reward efficiency comparison between First-Available and Reward-Based strategies. Higher is better; * indicates the winner.}{assets/r4_reward_efficiency.png}{fig:r4-eff}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Average reward efficiency (score/tick)}
+  \begin{tabular}{p{0.28\linewidth}ccc}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{Configuration} & \sustechtableheader{First-Avail.} & \sustechtableheader{Reward-Based} & \sustechtableheader{Winner} \\
+    \midrule
+    Baseline & 39.58 & 24.97 & First-Available \\
+    Low obstacles & 34.76 & 31.82 & First-Available \\
+    High obstacles & 34.81 & \textbf{50.86} & \textbf{Reward-Based} \\
+    Fast wind & 20.70 & 23.56 & Reward-Based \\
+    Static environment & 51.01 & 56.47 & Reward-Based \\
+    3 agents & 43.21 & 45.71 & Reward-Based \\
+    10 agents & 17.15 & 23.13 & \textbf{Reward-Based} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{Observations}
+
+The experimental results reveal nuanced findings:
+
+\begin{enumerate}
+  \item \textbf{No universal winner}: First-Available outperforms Reward-Based in baseline, low-obstacle, fast-wind, and 3-agent scenarios.
+  \item \textbf{Reward-Based excels in complex scenarios}: high obstacles (61\% faster completion, 46\% higher efficiency at 10 agents), static environment completes more holes before timeout.
+  \item \textbf{Why First-Available sometimes wins}: lower overhead; in fast-changing environments Reward-Based may waste effort on relocated targets; with fewer agents the ``closest'' heuristic suffices.
+  \item \textbf{Safety rate}: Both strategies show similar safety rates (0.64--0.78).
+\end{enumerate}
+
+\subsection{Parameter Effects Analysis}
+
+\subsubsection{Effect of Obstacle Density}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Completion time vs obstacle count}
+  \begin{tabular}{lcc}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{Obstacles} & \sustechtableheader{First-Avail. (ticks)} & \sustechtableheader{Reward-Based (ticks)} \\
+    \midrule
+    5 (low) & 844.5 & 538.3 \\
+    15 (baseline) & 1309.1 & 1450.9 \\
+    40 (high) & 974.1 & 376.0 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Observations.}
+\begin{itemize}
+  \item \textbf{Low obstacles}: Reward-Based is 36\% faster (538 vs 844 ticks).
+  \item \textbf{High obstacles}: Reward-Based is 61\% faster (376 vs 974 ticks).
+  \item The gap widens as obstacle density increases---Reward-Based's path efficiency gains become more significant.
+  \item First-Available is negatively affected by obstacles as it does not optimize path selection.
+\end{itemize}
+
+\subsubsection{Effect of Dynamic Update Interval}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Completion time vs wind interval}
+  \begin{tabular}{lcc}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{Wind Interval} & \sustechtableheader{First-Avail.} & \sustechtableheader{Reward-Based} \\
+    \midrule
+    Static ($\infty$) & 5000 (4.0 holes left) & 5000 (2.4 holes left) \\
+    Fast (10 ticks) & 1059.2 & 1424.3 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Observations.}
+\begin{itemize}
+  \item In static environments, both strategies hit the 5000 tick limit, but Reward-Based completes more holes (2.4 remaining vs 4.0).
+  \item In fast-changing environments, First-Available performs better (1059 vs 1424 ticks).
+  \item This suggests Reward-Based may select targets that get relocated by wind, causing wasted effort.
+  \item First-Available's ``grab first available'' approach is more robust to environmental changes.
+\end{itemize}
+
+\subsubsection{Effect of Agent Count (Non-Collaborative)}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Completion time vs agent count}
+  \begin{tabular}{lcc}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{\# Agents} & \sustechtableheader{First-Avail.} & \sustechtableheader{Reward-Based} \\
+    \midrule
+    3 & 964.9 & 1364.9 \\
+    5 (baseline) & 1309.1 & 1450.9 \\
+    10 & 550.7 & 347.2 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Observations.}
+\begin{itemize}
+  \item \textbf{With 3 agents}: First-Available is 41\% faster.
+  \item \textbf{With 10 agents}: Reward-Based is 37\% faster.
+  \item The crossover occurs because with more agents, competition for ``first available'' holes increases, while Reward-Based can assign diverse targets based on utility.
+\end{itemize}
+
+In non-collaborative mode, adding more agents does not always improve performance:
+\begin{itemize}
+  \item Initially improves as more holes can be worked on simultaneously.
+  \item Eventually saturates due to limited number of holes/tiles.
+  \item First-available shows more conflict (multiple agents targeting the same hole).
+\end{itemize}
+
+\subsection{Discussion}
+
+\subsubsection{What Worked Well}
+
+\begin{itemize}
+  \item SEU-based selection balances reward, distance, and energy feasibility
+  \item Proactive recharge prevents failures in challenging configurations
+  \item Wind interval sensitivity is manageable with proper pathfinding
+\end{itemize}
+
+\subsubsection{Sources of Inefficiency}
+
+\begin{itemize}
+  \item No coordination: redundant or conflicting targets
+  \item Static thresholds when far from stations
+  \item Greedy pathfinding local minima under dense obstacles
+\end{itemize}
+
+\subsubsection{Potential Improvements}
+
+\begin{itemize}
+  \item Multi-agent coordination (R5)
+  \item Dynamic threshold recharge strategy
+  \item A* or D* Lite for complex obstacles
+\end{itemize}
+
+\subsection{Pathfinding Algorithm Comparison}
+\label{sec:pathfinding-compare}
+
+\subsubsection{Experimental Setup}
+
+This section evaluates Greedy, A*, and D* Lite. Implementations come from \texttt{PathFinderAlgo-1.0-SNAPSHOT.jar} in \texttt{lib/}.
+
+\begin{sustechnote}[title={PathFinderAlgo}]
+Java pathfinding library (A*, D* Lite, variants). Repository: \url{https://github.com/Wellshh/PathFinderAlgo}. This project adds grid adapters, sensing, and toroidal borders.
+\end{sustechnote}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Pathfinding test configuration}
+  \begin{tabular}{lc}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{Parameter} & \sustechtableheader{Value} \\
+    \midrule
+    Grid Size & $50{\times}50$ \\
+    Agents & 5 \\
+    Holes & 10 \\
+    Obstacles & 15 \\
+    Wind Interval & 20 ticks (dynamic) \\
+    Pathfinding & Greedy / A* / D* Lite \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{Results}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Pathfinding algorithm performance}
+  \begin{tabular}{lcccc}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{Algorithm} & \sustechtableheader{Time (ticks)} & \sustechtableheader{Reward Eff.} & \sustechtableheader{Path Cost} & \sustechtableheader{Safety} \\
+    \midrule
+    \textbf{Greedy} & 2084.8 & 8.97 & 2.55 & 100\% \\
+    \textbf{A$^\ast$} & 2998.0 & 7.35 & 2.16 & 58\% \\
+    \textbf{D$^\ast$\,Lite} & 4298.2 & 10.38 & 1.78 & 68\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\textit{Lower completion time and path cost are better. Higher reward efficiency and safety rate are better.}
+
+\tileworldfigure{Multi-metric comparison of pathfinding algorithms (Greedy, A*, D* Lite).}{assets/pathfinding_comparison.png}{fig:pathfinding}
+
+\textbf{Conclusion}: No universal winner---use Greedy for speed, D* Lite for efficiency; A* is risky under frequent full replans in dynamic wind.
+
+\section{R5: Multi-Agent Collaboration}
+
+\subsection{Collaboration Mechanism: Contract Net Protocol}
+
+The multi-agent collaboration uses the \textbf{Contract Net Protocol (CNP)} (Smith, 1980), a market-based mechanism without centralized control.
+
+\begin{sustechnote}[title={References}]
+Smith, R.G. (1980). \emph{The Contract Net Protocol}. \url{https://www.reidgsmith.com/The_Contract_Net_Protocol_Dec-1980.pdf}. Wikipedia: \url{https://en.wikipedia.org/wiki/Contract_Net_Protocol}
+\end{sustechnote}
+
+\subsubsection{CNP Protocol Overview}
+
+The Contract Net Protocol operates through a four-phase handshake between a \emph{manager} (the agent that announces a task) and \emph{contractors} (peers that may satisfy it). \Cref{fig:cnp-handshake} summarizes the message flow; the following steps map this abstraction onto the simulation's \texttt{ContractNetBoard}.
+
+\begin{figure}[htbp]
+  \centering
+  \begin{sustechsystemdiagram}
+    % Tall lifeline-style entities (wider + taller than default sustech module)
+    \sustechmodulebox[minimum width=36mm, minimum height=56mm, inner sep=7pt]{mgr}{at={(0,0)}}{%
+      \textbf{Manager}\\[3pt]\scriptsize (Agent)}
+    \sustechmodulebox[minimum width=36mm, minimum height=56mm, inner sep=7pt]{ctr}{right=78mm of mgr}{%
+      \textbf{Contractors}\\[3pt]\scriptsize (Agents)}
+    % Message attachment points along full vertical extent of each column
+    \path (mgr.north east) -- (mgr.south east)
+      coordinate[pos=0.10] (lane-m-1)
+      coordinate[pos=0.36] (lane-m-2)
+      coordinate[pos=0.64] (lane-m-3)
+      coordinate[pos=0.90] (lane-m-4);
+    \path (ctr.north west) -- (ctr.south west)
+      coordinate[pos=0.10] (lane-c-1)
+      coordinate[pos=0.36] (lane-c-2)
+      coordinate[pos=0.64] (lane-c-3)
+      coordinate[pos=0.90] (lane-c-4);
+    \sustechconnecttowith{sustech highlight arrow}[][1.\ Call for proposals (CFP)]{lane-m-1}{lane-c-1}
+    \sustechconnecttowith{sustech flow arrow}[][2.\ Submit bids]{lane-c-2}{lane-m-2}
+    \sustechconnecttowith{sustech flow arrow}[][3.\ Award contract]{lane-m-3}{lane-c-3}
+    \draw[sustech flow arrow, {Latex[length=2.5mm,width=1.8mm]}-{Latex[length=2.5mm,width=1.8mm]}]
+      (lane-m-4) -- node[sustech edge label]{4.\ Execute / report} (lane-c-4);
+  \end{sustechsystemdiagram}
+  \caption{Contract Net handshake (conceptual)}
+  \label{fig:cnp-handshake}
+\end{figure}
+
+\begin{enumerate}
+  \item \textbf{Call For Proposals (CFP):} When an agent discovers an unclaimed task (a hole or an energy station), it announces the task to the \texttt{ContractNetBoard}, which broadcasts a call for proposals to eligible peers.
+  \item \textbf{Bidding:} Interested agents respond with bids that include utility scores reflecting expected reward, travel cost, energy risk, and (where applicable) switching penalties---so the board can compare commitments on a common scale.
+  \item \textbf{Award:} The board evaluates feasible bids and awards the contract to the highest-utility bidder; ties or infeasible bids are resolved according to the configured evaluation strategy.
+  \item \textbf{Execution:} The awarded agent executes the task (acquire/move/fill or recharge). If execution fails or the task becomes invalid, the contract may be released and the task re-auctioned in a later tick.
+\end{enumerate}
+
+\subsubsection{Task Types}
+
+The implementation classifies work into three CNP task types so the board can announce the minimal commitment required---from a full hole-servicing chain down to a direct fill or a recharge slot.
+
+\begin{table}[htbp]
+  \centering
+  \caption{CNP task types}
+  \begin{tabular}{lp{0.40\linewidth}p{0.34\linewidth}}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{Task Type} & \sustechtableheader{Description} & \sustechtableheader{When Announced} \\
+    \midrule
+    \texttt{SERVICE\_HOLE} &
+      Complete task chain: acquire a tile, reach the hole, and fill it. &
+      Agent still needs both a suitable tile and a target hole (full service contract). \\
+    \texttt{DIRECT\_FILL\_HOLE} &
+      Fill the hole only; the agent already carries a tile. &
+      Agent holds a tile and only needs routing and execution for the fill action. \\
+    \texttt{RECHARGE\_SLOT} &
+      Claim a slot at an energy station for replenishment. &
+      Agent must recharge (proactive or critical energy state) and competes for station access. \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Each row corresponds to a distinct announcement path on the board: \texttt{SERVICE\_HOLE} coordinates tile acquisition and hole completion, \texttt{DIRECT\_FILL\_HOLE} avoids redundant tile claims when cargo is already held, and \texttt{RECHARGE\_SLOT} serializes contention at scarce stations alongside hole tasks.
+
+\subsection{Contract Evaluation Strategy}
+
+The core bid evaluation is implemented in \texttt{ContractEvaluationStrategy.java}:
+
+\begin{sustechcode}{Java}
+public interface ContractEvaluationStrategy {
+    ContractBid buildHoleBid(Agent bidder, Hole hole, List<Tile> candidateTiles,
+            Grid<Object> grid, List<EnergyStation> allStations,
+            int safetyMargin, int maxGridDistance);
+
+    ContractBid buildRechargeBid(Agent bidder, EnergyStation station,
+            Grid<Object> grid, int safetyMargin, int maxGridDistance);
+
+    int compareBids(ContractBid a, ContractBid b);
+}
+\end{sustechcode}
+
+Utility formulas for hole service, direct fill, and recharge follow the same weighted structure as in R4 (score, hold bonus, distance, risk, switch penalty; recharge adds urgency and queue terms). Feasibility gates require available targets, sufficient energy, and agent not powered down.
+
+\subsection{Integration with BDI}
+
+In Contract Net mode, coordination goes through the board each tick:
+
+\begin{sustechcode}{Java}
+if (this.contractNetBoard != null) {
+    this.contractNetBoard.tick(this, beliefState, currentPosition);
+} else {
+    List<Agent> partners = this.policyBundle.getCoordinationStrategy()
+            .selectPartners(this, beliefState, this.currentIntention);
+}
+\end{sustechcode}
+
+\subsection{Evaluation: Collaboration vs Non-Collaboration}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Coordination mode comparison (seeds 1--10, A* pathfinding)}
+  \begin{tabular}{lcccc}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{Metric} & \sustechtableheader{DISABLED} & \sustechtableheader{PASSIVE} & \sustechtableheader{ACTIVE} & \sustechtableheader{CONTRACT\_NET} \\
+    \midrule
+    Completion Time & 2998.0 & 3063.1 & 3278.0 & \textbf{699.8} * \\
+    Reward Efficiency & 7.71 & 7.54 & 7.52 & \textbf{19.48} * \\
+    Path Cost & 2.14 & 2.14 & 2.17 & \textbf{1.51} * \\
+    Safety Rate & 58\% & 58\% & 56\% & \textbf{100\%} * \\
+    Remaining Holes & 0.6 & 0.6 & 1.1 & \textbf{0.0} * \\
+    Cooperation Gain & 0.0 & -2.17 & -9.34 & \textbf{+76.66} * \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\tileworldfigure{Radar chart comparing coordination modes across metrics. CONTRACT\_NET dominates.}{assets/coordination_radar.png}{fig:coord-radar}
+
+\subsubsection{Key Observations}
+
+Contract Net yields about $4.3\times$ faster completion, $\sim 3\times$ reward efficiency, 100\% safety, and zero remaining holes versus other modes; ACTIVE adds overhead without effective allocation.
+
+\subsection{Discussion}
+
+CNP improves efficiency by assigning high-value holes to capable nearby agents, prioritizing critical recharge, and reducing redundant work. Limitations: single-agent task chains, CNP latency under very fast wind, static bid weights.
+
+\begin{thebibliography}{9}
+\bibitem{pollack1990}
+M.~E. Pollack and M.~Ringuette.
+\newblock Introducing the Tileworld: Experimentally Evaluating Agent Architectures.
+\newblock In \emph{AAAI-90}, pages 183--189. AAAI Press, 1990.
+
+\bibitem{smith1980}
+R.~G. Smith.
+\newblock The Contract Net Protocol: High-Level Communication and Control in a Distributed Problem Solver.
+\newblock \emph{IEEE Trans.\ Comput.}, C-29(12):1104--1113, 1980.
+\newblock \url{https://www.reidgsmith.com/The_Contract_Net_Protocol_Dec-1980.pdf}
+
+\bibitem{wellshh2024}
+Wellshh.
+\newblock \emph{PathFinderAlgo --- Path Planning Algorithms Library}, 2024.
+\newblock \url{https://github.com/Wellshh/PathFinderAlgo}
+
+\bibitem{wooldridge2003}
+M.~Wooldridge.
+\newblock \emph{Reasoning about Rational Agents}.
+\newblock MIT Press, 2003.
+\end{thebibliography}
+
+\appendix
+\section{Key Code Snippets}
+
+\subsection{BDI Execution Cycle (\texttt{Agent.java\#run()})}
+
+\begin{sustechcode}{Java}
+@ScheduledMethod(start = 1, interval = 1)
+public void run() {
+    if (this.poweredDown) { return; }
+
+    AgentBeliefState preBelief = this.buildBeliefState();
+    if (this.contractNetBoard == null) {
+        this.reviseBeliefs(preBelief);
+    }
+    AgentBeliefState beliefState = this.buildBeliefState();
+
+    List<AgentDesire> desires = this.policyBundle.getDesireEvaluationStrategy()
+            .evaluate(beliefState, this);
+
+    AgentIntention nextIntention = this.policyBundle.getTaskSelectionStrategy()
+            .selectIntention(beliefState, desires, this.currentIntention);
+    this.commitIntention(nextIntention, currentPosition);
+
+    List<Agent> partners = this.policyBundle.getCoordinationStrategy()
+            .selectPartners(this, beliefState, this.currentIntention);
+    this.syncCoordinationPartners(partners);
+
+    this.act(context);
+}
+\end{sustechcode}
+
+\subsection{Desire Evaluation (\texttt{DefaultDesireEvaluationStrategy.java})}
+
+\begin{sustechcode}{Java}
+public List<AgentDesire> evaluate(AgentBeliefState beliefState, Agent agent) {
+    List<AgentDesire> desires = new ArrayList<>();
+
+    if (this.rechargeStrategy.shouldRecharge(beliefState)
+            && beliefState.getClaimedEnergyStation() != null) {
+        desires.add(new AgentDesire(AgentDesireType.RECHARGE, 100,
+                beliefState.getClaimedEnergyStation()));
+    }
+
+    if (beliefState.isHoldingTile() && beliefState.getClaimedHole() != null) {
+        desires.add(new AgentDesire(AgentDesireType.FILL_HOLE, 90,
+                beliefState.getClaimedHole()));
+    }
+
+    if (!beliefState.isHoldingTile() && beliefState.getClaimedTile() != null) {
+        desires.add(new AgentDesire(AgentDesireType.ACQUIRE_TILE, 80,
+                beliefState.getClaimedTile()));
+    }
+
+    desires.add(new AgentDesire(AgentDesireType.EXPLORE, 10, null));
+    return desires;
+}
+\end{sustechcode}
+
+\subsection{Greedy Path Planning (\texttt{GreedyPathPlanningStrategy.java})}
+
+\begin{sustechcode}{Java}
+public GridPoint nextStep(Agent agent, GridPoint currentPosition,
+        GridPoint targetPosition) {
+    GridDimensions dimensions = agent.getGrid().getDimensions();
+    int curX = currentPosition.getX(), curY = currentPosition.getY();
+
+    if (curX != targetPosition.getX()) {
+        int[] candidateX = this.computeNextCoordinate(
+                curX, targetPosition.getX(), dimensions.getWidth());
+        if (agent.canMoveTo(candidateX[0], curY))
+            return new GridPoint(candidateX[0], curY);
+        if (agent.canMoveTo(candidateX[1], curY))
+            return new GridPoint(candidateX[1], curY);
+    }
+
+    if (curY != targetPosition.getY()) {
+        int[] candidateY = this.computeNextCoordinate(
+                curY, targetPosition.getY(), dimensions.getHeight());
+        if (agent.canMoveTo(curX, candidateY[0]))
+            return new GridPoint(curX, candidateY[0]);
+        if (agent.canMoveTo(curX, candidateY[1]))
+            return new GridPoint(curX, candidateY[1]);
+    }
+
+    return currentPosition;
+}
+\end{sustechcode}
+
+\subsection{Wind Dynamic Update (\texttt{Wind.java\#blow()})}
+
+\begin{sustechcode}{Java}
+public void blow() {
+    List<Obstacle> obstacles = new ArrayList<>();
+    List<Tile> tiles = new ArrayList<>();
+    for (Object obj : this.context) {
+        if (obj instanceof Obstacle) obstacles.add((Obstacle) obj);
+        else if (obj instanceof Tile) tiles.add((Tile) obj);
+    }
+
+    List<int[]> candidateCells = this.collectCandidateCells();
+    this.pickWithoutReplacement(candidateCells, obstacles.size() + tiles.size());
+
+    int cursor = 0;
+    for (Obstacle o : obstacles) {
+        int[] pos = candidateCells.get(cursor++);
+        this.grid.moveTo(o, pos[0], pos[1]);
+    }
+    for (Tile t : tiles) {
+        int[] pos = candidateCells.get(cursor++);
+        this.grid.moveTo(t, pos[0], pos[1]);
+    }
+}
+\end{sustechcode}

@@ -1,0 +1,407 @@
+% !TEX program = xelatex
+\documentclass[titlepage=formal,code=listings]{../../SUSTechHomework}
+
+\title{Multi-Agent Tileworld: BDI Agents with Contract Net Collaboration in Dynamic Environments}
+\author{[Junyan Bai]}
+\sid{[12212108]}
+\email{12212108@mail.sustech.edu.cn}
+\coursecode{CSE5022}
+\coursename{Advanced Multi-Agent Systems}
+\semester{Spring 2026}
+\department{Department of Computer Science and Engineering}
+% \college{Shuren College}
+\reporttype{Course Project Report}
+\date{\today}
+
+% Optional figures: place PNGs under ./assets/ (same names as in report.md).
+\newcommand{\tileworldfigure}[3]{%
+  \begin{figure}[htbp]
+    \centering
+    \IfFileExists{#2}{%
+      \includegraphics[width=0.92\linewidth]{#2}%
+    }{%
+      \sustechplaceholdergraphic[0.92\linewidth][6cm]%
+    }%
+    \caption{#1}%
+    \label{#3}%
+  \end{figure}%
+}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+\subsection{The Tileworld Problem}
+
+The Tileworld is a classic grid-based testbed introduced by Pollack \& Ringuette (1990) for evaluating rational agent behavior in dynamic environments. An agent gains reward by acquiring tiles and filling holes, but ``wind'' dynamics continuously relocate obstacles and tiles, forcing ongoing replanning and testing the coupling between perception, deliberation, and action.
+
+In this project, I implement an extended multi-agent version of Tileworld that adds obstacles, energy management, and support for multiple coordination mechanisms. It provides a controlled setting to study BDI reasoning, proactive resource management, and collaborative task allocation.
+
+\subsection{Project Objectives}
+
+This work addresses five core requirements from the assignment:
+
+\begin{enumerate}
+  \item \textbf{Dynamic environment (R1):} I implement a configurable grid where \emph{only tiles and obstacles} change position at a user-defined interval, while holes, energy stations, and agents remain fixed. All parameters are exposed via the Repast GUI for experimentation.
+  \item \textbf{Single-agent BDI behavior (R2):} Each agent follows a complete Belief-Desire-Intention control loop to sense the environment, deliberate, and select actions. Agents must navigate around obstacles while maximizing score from filling holes.
+  \item \textbf{Energy management (R3):} Agents consume one unit of energy per move and must recharge at energy stations. I implement a proactive strategy to prevent energy depletion before agents can reach a station.
+  \item \textbf{Baseline evaluation (R4):} I empirically compare reward-oriented task selection against a ``first available hole'' baseline, measuring completion time and total score across multiple runs with varying parameters.
+  \item \textbf{Multi-agent collaboration (R5):} I implement the Contract Net Protocol for collaborative task allocation and compare its performance against the non-cooperative baseline to quantify the benefits of coordination.
+\end{enumerate}
+
+\subsection{Architecture Overview}
+
+I built this project on Repast Simphony 2.11.0 (Java 11) using a modular strategy-based design:
+
+\begin{itemize}
+  \item \textbf{Strategy pattern:} Coordination, path planning, recharge, and task selection are all interfaces with multiple interchangeable implementations.
+  \item \textbf{BDI core:} The \texttt{Agent} class implements the main BDI cycle, with beliefs, desires, and intentions structured in the \texttt{bdi} package.
+  \item \textbf{Multiple path planners:} Greedy, A*, and D* Lite algorithms are provided for static and dynamic environments.
+  \item \textbf{Coordination modes:} Disable, passive, active, and Contract Net coordination modes are all supported.
+  \item \textbf{Built-in metrics:} Agent-level and simulation-level metrics are collected for benchmarking.
+\end{itemize}
+
+The following sections detail each component and present empirical results from my experiments.
+
+\section{R1: Dynamic Environment Implementation}
+
+\subsection{Environment Configuration Parameters}
+
+All simulation parameters are exposed through the Repast Simphony GUI, allowing users to easily configure experiments without modifying code. \cref{fig:repast-gui} shows the parameter configuration screen in the Repast runtime environment.
+
+\tileworldfigure{Repast Simphony runtime GUI showing all user-configurable parameters for the simulation.}{assets/repast_gui.png}{fig:repast-gui}
+
+\subsubsection{Basic Environment Parameters}
+
+The following core parameters can be adjusted directly via the GUI:
+
+\begin{itemize}
+  \item \textbf{Grid dimensions}: Grid width and height (customizable from $20\times 20$ to $100\times 100$)
+  \item \textbf{Entity counts}: Number of agents, holes, tiles, obstacles, and energy stations
+  \item \textbf{Wind interval}: Dynamic environment update frequency (number of ticks between each repositioning)
+  \item \textbf{Agent sensing range}: Maximum distance agents can detect obstacles and other entities
+  \item \textbf{Initial agent energy}: Starting energy level for all agents
+  \item \textbf{Maximum simulation ticks}: Hard stop condition for the simulation
+  \item \textbf{Claim timeout}: Number of ticks after which an uncompleted claim is automatically released
+\end{itemize}
+
+\subsubsection{Strategy Selection Parameters}
+
+To facilitate rapid experimentation, the implementation also exposes high-level strategy selection parameters:
+
+\begin{itemize}
+  \item \textbf{Coordination mode}: Dropdown selection between Disabled, Passive, Active, and Contract Net coordination
+  \item \textbf{Path planning strategy}: Dropdown selection between Greedy, A*, and D* Lite (or mixed random assignment)
+  \item \textbf{Environment profile}: Predefined configurations for common experiment types (\texttt{FAST\_CHANGE}, \texttt{LONG\_RANGE}, \texttt{BASELINE}, \texttt{CUSTOM})
+\end{itemize}
+
+When a predefined profile is selected, the corresponding parameters are automatically set. \texttt{CUSTOM} mode allows users to manually adjust all parameters.
+
+\subsection{Dynamic Update Mechanism (The Wind Model)}
+
+Following the assignment requirements, only a subset of environment objects are dynamic, while others remain fixed throughout the entire simulation:
+
+\begin{table}[htbp]
+  \centering
+  \caption{Object mobility in the dynamic environment}
+  \begin{tabular}{llp{0.45\linewidth}}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{Object Type} & \sustechtableheader{Mobility} & \sustechtableheader{Reasoning} \\
+    \midrule
+    Tiles        & \textbf{Dynamic} & Moved by wind to create planning challenges \\
+    Obstacles    & \textbf{Dynamic} & Moved by wind to create dynamic path planning \\
+    Holes        & \textbf{Fixed}   & Holes are the persistent tasks to be completed \\
+    Energy Stations & \textbf{Fixed} & Known reference points for energy planning \\
+    Agents       & \textbf{Fixed}   & Agents do not have fixed positions (they move themselves) \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{Update Algorithm}
+
+Dynamic updates are handled by the \texttt{Wind} class (\texttt{src/mas\_tileworld/Wind.java}), which is scheduled to run every $N$ ticks where $N$ is the user-configurable wind interval. The update algorithm proceeds in five steps:
+
+\begin{enumerate}
+  \item \textbf{Collection}: Gather all current tiles and obstacles from the context
+  \item \textbf{Candidate cell identification}: Identify all cells not occupied by fixed objects (holes, energy stations, agents) as candidate positions for relocation
+  \item \textbf{Random sampling}: Select $N$ unique candidate cells without replacement for tiles and obstacles
+  \item \textbf{Relocation}: Move all tiles and obstacles to their new randomly selected positions
+  \item \textbf{Synchronization}: Update the shared grid representation and notify agents to trigger replanning
+\end{enumerate}
+
+This approach guarantees that no overlaps occur after repositioning, as we only place dynamic objects on cells that are guaranteed to be free. The algorithm uses an efficient Fisher-Yates shuffle to sample without replacement, avoiding repeated random retries that can occur with naive sampling approaches.
+
+\subsubsection{Grid Synchronization}
+
+After repositioning obstacles, the implementation synchronizes the global occupancy grid for A* pathfinding:
+
+\begin{itemize}
+  \item Old obstacle positions are cleared from the shared grid
+  \item New obstacle positions are marked as occupied
+  \item All A* agents are notified to trigger a full replan
+\end{itemize}
+
+For D* Lite agents, each agent maintains its own local obstacle map and will incrementally update as it senses changes during normal movement. This preserves the incremental advantage of D* Lite in dynamic environments.
+
+\section{R2: Single-Agent Behavior}
+
+\subsection{BDI Agent Architecture Design}
+
+The agent implementation follows the classical Belief-Desire-Intention (BDI) model (Wooldridge, 2003), adapted for the multi-agent Tileworld domain. Each agent executes a complete reasoning cycle every simulation tick.
+
+\subsubsection{BDI Execution Cycle}
+
+The main execution loop is implemented in \texttt{Agent.java\#run()}. Each tick executes six phases:
+
+\begin{enumerate}
+  \item \textbf{Belief Construction} (\texttt{buildBeliefState()}): Sense the environment within sensing range to discover tiles, holes, obstacles, and other agents
+  \item \textbf{Belief Revision} (\texttt{reviseBeliefs()}): Drop invalidated intentions (e.g., target tile was picked up by someone else), update claims
+  \item \textbf{Desire Generation} (\texttt{DefaultDesireEvaluationStrategy.evaluate()}): Generate candidate goals based on current state
+  \item \textbf{Intention Selection} (\texttt{DefaultTaskSelectionStrategy.selectIntention()}): Choose highest-priority intention with persistence
+  \item \textbf{Coordination} (\texttt{CoordinationStrategy.selectPartners()}): Apply coordination strategy for multi-agent collaboration
+  \item \textbf{Action Execution} (\texttt{act()}): Execute one step toward the current intention (move, pick up, fill, or recharge)
+\end{enumerate}
+
+\subsubsection{Belief State Representation}
+
+The belief state (\texttt{AgentBeliefState.java}) contains two categories of information:
+
+\begin{itemize}
+  \item \textbf{Self-Beliefs}: Current position, energy level, whether holding a tile, current claims (tile/hole/station)
+  \item \textbf{Environmental Beliefs}: Visible tiles, holes, energy stations, and other agents within sensing range
+\end{itemize}
+
+Energy station locations are known from simulation start (not sensed), which enables proactive planning for recharge.
+
+\subsubsection{Desire Types and Priorities}
+
+Four desire types are defined, ordered by priority (higher = more urgent):
+
+\begin{table}[htbp]
+  \centering
+  \caption{Desire priorities}
+  \begin{tabular}{clp{0.42\linewidth}}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{Priority} & \sustechtableheader{Desire} & \sustechtableheader{Trigger Condition} \\
+    \midrule
+    100 & RECHARGE & Energy below threshold, station claimed \\
+    90 & FILL\_HOLE & Holding tile and has claimed hole \\
+    80 & ACQUIRE\_TILE & Not holding tile, has claimed tile \\
+    10 & EXPLORE & Default when no other desire available \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{Intention Selection}
+
+Intentions represent committed goals. The selection strategy:
+
+\begin{itemize}
+  \item Selects the highest-priority active desire
+  \item Maintains intention persistence---continues working toward current goal unless higher-priority desire emerges
+  \item Includes timeout handling: releases claims after configurable ticks without progress
+\end{itemize}
+
+\subsection{Obstacle Avoidance Strategy}
+
+\subsubsection{Obstacle Detection}
+
+Agents detect obstacles through \texttt{canMoveTo(x, y)}, which queries the grid cell for \texttt{Obstacle} instances. Detection range is limited by the configurable sensing range.
+
+\subsubsection{Pathfinding Algorithms}
+
+Three path planning strategies are available (selectable via GUI):
+
+\begin{table}[htbp]
+  \centering
+  \caption{Path planning strategies}
+  \begin{tabular}{p{0.18\linewidth}p{0.32\linewidth}p{0.35\linewidth}}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{Algorithm} & \sustechtableheader{Characteristics} & \sustechtableheader{Best For} \\
+    \midrule
+    \textbf{Greedy} & Heuristic-only, one-step lookahead & Simple, fast execution \\
+    \textbf{A$^\ast$} & Optimal static path, full replan after changes & Stable environments \\
+    \textbf{D$^\ast$\,Lite} & Incremental dynamic replanning & Highly dynamic environments \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+All three respect wraparound borders (toroidal grid) and avoid obstacles detected through sensing.
+
+\begin{sustechnote}[title={Implementation Note}]
+The A* and D* Lite implementations are built on top of an external pathfinding library that I developed separately. The library provides the core algorithmic implementations while this project adds the grid interface, obstacle sensing integration, and wraparound border handling. See \cref{sec:pathfinding-compare} for experimental evaluation of different pathfinding algorithms.
+\end{sustechnote}
+
+\begin{sustechnote}[title={Reference}]
+Wellshh. (2024). \emph{PathFinderAlgo --- Path Planning Algorithms Library}. GitHub: \url{https://github.com/Wellshh/PathFinderAlgo}
+\end{sustechnote}
+
+\subsubsection{Interaction with Dynamic Changes}
+
+When Wind repositions obstacles:
+
+\begin{itemize}
+  \item A* agents receive updated global grid and trigger full replan
+  \item D* Lite agents incrementally update their local maps as they sense changes during normal operation
+\end{itemize}
+
+\subsection{Score Maximization Strategy}
+
+\subsubsection{Reward Model}
+
+\begin{itemize}
+  \item \textbf{+X points}: Awarded when hole is filled ($X$ = hole's score, 1--10)
+  \item \textbf{$-1$ energy}: Per movement to adjacent cell
+  \item \textbf{Constraint}: Single agent must complete full task chain (acquire tile $\to$ move $\to$ fill)
+\end{itemize}
+
+\subsubsection{Reward-Based Selection}
+
+The default strategy selects tasks based on:
+
+\begin{enumerate}
+  \item \textbf{Distance}: Prefer closer holes (lower energy cost)
+  \item \textbf{Energy margin}: Must have enough energy to complete the task
+  \item \textbf{Current state}: Holding tile $\to$ FILL\_HOLE takes priority
+\end{enumerate}
+
+\subsubsection{First-Available Baseline}
+
+For R4 evaluation, a baseline ``first-available'' strategy selects the first unclaimed hole encountered, regardless of distance or expected reward. This represents non-strategic greedy behavior.
+
+\section{R3: Energy Management (Pro-active Battery Management)}
+
+\subsection{Energy Model Specification}
+
+The energy system models a finite battery that depletes with movement and must be replenished at energy stations:
+
+\begin{table}[htbp]
+  \centering
+  \caption{Energy model parameters}
+  \begin{tabular}{lp{0.55\linewidth}}
+    \toprule
+    \sustechheaderrow
+    \sustechtableheader{Parameter} & \sustechtableheader{Value} \\
+    \midrule
+    Initial energy & 100 units (100\%) \\
+    Consumption rate & $-1$ unit per movement to adjacent cell \\
+    Recharge mechanism & Agent must occupy same cell as energy station \\
+    Recharge outcome & Energy restored to 100\% \\
+    Knowledge & All energy station locations are known from simulation start \\
+    Failure condition & Energy reaches 0 $\to$ agent powers down until rescued \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+When an agent runs out of energy, it powers down and drops any carried tile back onto its current cell. The agent remains powerless until another agent frees an energy station or the agent somehow reaches one (which requires external intervention in the current implementation).
+
+\subsection{Recharge Decision Strategy}
+
+Two recharge strategies are implemented. The \textbf{DefaultRechargeStrategy} uses a static threshold (configurable via GUI), while the \textbf{DynamicThresholdStrategy} adapts the threshold based on distance to the nearest station.
+
+\subsubsection{DefaultRechargeStrategy (Static Threshold)}
+
+The default strategy triggers recharge when energy falls below a fixed threshold:
+
+\begin{sustechcode}{Java}
+public boolean shouldRecharge(AgentBeliefState beliefState) {
+    return beliefState.getClaimedEnergyStation() != null
+        || beliefState.getEnergy() <= this.lowEnergyThreshold;
+}
+\end{sustechcode}
+
+This simple approach works well when all stations are approximately equidistant, but can be suboptimal when agents are far from stations.
+
+\subsubsection{DynamicThresholdStrategy (Adaptive Threshold)}
+
+The \texttt{DynamicThresholdStrategy} (\texttt{src/mas\_tileworld/strategy/impl/energy/DynamicThresholdStrategy.java}) computes a runtime threshold based on actual distance to the nearest energy station, plus a safety buffer for dynamic environment uncertainty:
+
+\begin{sustechcode}{Java}
+public boolean shouldRecharge(AgentBeliefState beliefState) {
+    // Already heading to station
+    if (beliefState.getClaimedEnergyStation() != null) {
+        return true;
+    }
+
+    // Find nearest visible station
+    GridCell<EnergyStation> nearestCell = this.findNearestStation(
+            beliefState.getVisibleEnergyStations(),
+            beliefState.getCurrentPosition());
+
+    if (nearestCell == null) return false;
+
+    int nearestDistance = this.distance(beliefState.getCurrentPosition(),
+            nearestCell.getPoint());
+
+    // Threshold = distance + buffer (10% for wind uncertainty)
+    return beliefState.getEnergy() <= nearestDistance * (1 + buffer);
+}
+\end{sustechcode}
+
+The station selection logic also considers queueing costs:
+
+\begin{sustechcode}{Java}
+private int calculateScore(int ownDistance, int waitingCost) {
+    double alpha = Hyperparameters.getRechargeDistanceWeight();
+    double beta = Hyperparameters.getRechargeWaitingWeight();
+    return (int) Math.round(alpha * ownDistance + beta * waitingCost);
+}
+\end{sustechcode}
+
+\subsubsection{Conceptual Diagram}
+
+The following diagram illustrates how the DynamicThresholdStrategy determines when to initiate recharge:
+
+\begin{figure}[htbp]
+  \centering
+  {\ttfamily\small
+  \begin{minipage}{0.95\linewidth}
+  \begin{verbatim}
+                    Energy Level
+    100 |                                        === Maximum (100)
+        |                                   +-----+
+     80 |                              +-----+
+        |                         +-----+     <- Dynamic Threshold
+     60 |                    +-----+           (distance x 1.1)
+        |               +-----+
+     40 |          +-----+                    <- Static Threshold (20)
+        |     +-----+
+     20 |-----+                              === Low Energy Warning
+        |________________________________________ Distance to Station
+              0    10   20   30   40   50
+                   (cells)
+
+    +-----------------------------------------------------------------+
+    |  Example: Agent 30 cells from station                           |
+    |  - Dynamic threshold = 30 x 1.1 = 33 units                    |
+    |  - Agent initiates recharge when energy <= 33                 |
+    |  - This guarantees energy buffer of 3 units after arrival     |
+    +-----------------------------------------------------------------+
+  \end{verbatim}
+  \end{minipage}}
+  \caption{Dynamic vs static recharge threshold (conceptual)}
+\end{figure}
+
+The dynamic threshold adapts to the agent's position: closer agents wait longer before recharging, while distant agents start earlier to ensure they can reach the station.
+
+\subsection{Why This Strategy Prevents Deadlock}
+
+The proactive recharge strategy prevents agents from getting stranded with zero energy through three mechanisms:
+
+\begin{enumerate}
+  \item \textbf{Distance-based threshold}: By triggering recharge when energy $\geq$ distance to nearest station, agents always have enough energy to reach a station (assuming no major detours)
+  \item \textbf{Safety buffer (10\%)}: The additional buffer accounts for path deviations caused by dynamic obstacle repositioning between when the threshold is computed and when the agent arrives
+  \item \textbf{Emergency priority}: In Contract Net mode, emergency recharge requests receive higher priority in bid evaluation, ensuring critical agents get priority access to stations
+\end{enumerate}
+
+This design ensures agents never begin a task they cannot complete due to energy constraints.
+
+\input{report-sec56.tex}
+
+\end{document}
