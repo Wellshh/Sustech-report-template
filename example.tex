@@ -1,5 +1,12 @@
 % !TEX program = xelatex
-\documentclass[titlepage=formal,code=listings]{SUSTechHomework}
+% To show a logo at the top of the cover, add the logo= option, e.g.:
+%   \documentclass[titlepage=formal,logo=assets/校徽+中英文校名-上下.pdf]{SUSTechHomework}
+% Available logos in assets/:
+%   校徽.pdf
+%   校徽+中文校名-上下.pdf    校徽+中文校名-左右.pdf
+%   校徽+中英文校名-上下.pdf  校徽+中英文校名-左右.pdf
+%   火炬+英文校名-上下.pdf    火炬+英文校名-左右.pdf
+\documentclass[titlepage=formal,logo=assets/校徽+中英文校名-上下.pdf,code=listings]{SUSTechHomework}
 
 \title{Modernized Template Smoke Test / 模板冒烟测试}
 \coursecode{CS100}
@@ -9,6 +16,9 @@
 \reporttype{Course Project Report}
 \date{\today}
 \addbibresource{example.bib}
+% Optional: show a "Code available at: <url>" line in the page footer.
+% Remove or comment out if there is no public code repository.
+\codeurl{https://github.com/example/sustech-report-template}
 
 \begin{document}
 

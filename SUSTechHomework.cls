@@ -43,6 +43,7 @@
 \DeclareStringOption[sustech]{theme}
 \DeclareStringOption[auto]{lang}
 \DeclareStringOption[simple]{titlepage}
+\DeclareStringOption[]{logo}
 \DeclareDefaultOption{\PassOptionsToClass{\CurrentOption}{article}}
 \ProcessKeyvalOptions*
 
@@ -997,6 +998,40 @@
 \def\univ#1{\gdef\@univ{#1}}
 \def\@univ{SUSTech}
 
+% ---- Logo rendering size (controls how large the image is drawn) ----
+% \sustechformallogosize{max-width}{max-height} -- formal cover page
+% \sustechsimplelogosize{max-height}            -- simple inline title
+% The image is always kept at its original aspect ratio (keepaspectratio).
+\def\sustech@formalogowidth{0.52\linewidth}
+\def\sustech@formalogoheight{3.5cm}
+\def\sustech@simplelogoheight{2.2cm}
+\newcommand{\sustechformallogosize}[2]{%
+  \def\sustech@formalogowidth{#1}%
+  \def\sustech@formalogoheight{#2}%
+}
+\newcommand{\sustechsimplelogosize}[1]{\def\sustech@simplelogoheight{#1}}
+
+% ---- Logo overlay position (TikZ anchor on current page, zero impact on flow) ----
+% \sustechlogopos{x-offset}{y-offset}: shifts the overlay node from page top-center.
+%   TikZ convention: positive x = right, positive y = up.
+%   Default: centered, top-edge of logo sits 1.8 cm below the page top edge.
+\def\sustech@logox{0cm}
+\def\sustech@logoy{-1.8cm}
+\newcommand{\sustechlogopos}[2]{%
+  \def\sustech@logox{#1}%
+  \def\sustech@logoy{#2}%
+}
+
+% ---- Vertical space reserved in the content flow (independent of logo size/position) ----
+% Changing logo size or position does NOT move the title/author block.
+% Adjust only when you want to shift the entire content block up or down.
+% \sustechlogospace{height}       -- formal title (default 3.5cm)
+% \sustechsimplelogospace{height} -- simple title (default 2.2cm)
+\def\sustech@logospaceh{3.5cm}
+\def\sustech@simplelogospace{2.2cm}
+\newcommand{\sustechlogospace}[1]{\def\sustech@logospaceh{#1}}
+\newcommand{\sustechsimplelogospace}[1]{\def\sustech@simplelogospace{#1}}
+
 \def\semester#1{\gdef\@semester{#1}}
 \def\@semester{}
 
@@ -1293,6 +1328,18 @@
 }
 
 \newcommand{\sustech@simpletitle}{%
+  % In simple mode, draw logo as a TikZ page overlay (zero height in flow).
+  % Content position is controlled solely by \sustech@simplelogospace.
+  \ifdefempty{\sustech@logo}{}{%
+    \begin{tikzpicture}[remember picture, overlay]
+      \node[anchor=north, xshift=\sustech@logox, yshift=\sustech@logoy]
+        at (current page.north) {%
+          \includegraphics[height=\sustech@simplelogoheight,keepaspectratio]{\sustech@logo}%
+        };
+    \end{tikzpicture}%
+    % Reserve a fixed vertical gap; independent of logo size/position.
+    \vspace*{\sustech@simplelogospace}\vspace{0.4em}%
+  }%
   \noindent
   \makebox[\linewidth]{%
     \begin{minipage}[b]{.64\linewidth}
@@ -1321,8 +1368,19 @@
   \thispagestyle{empty}
   \begingroup
     \centering
-    {\Large\sffamily\color{SUSTechPrimary}\@univ\par}
-    \vspace{0.7cm}
+    \ifdefempty{\sustech@logo}{%
+      {\Large\sffamily\color{SUSTechPrimary}\@univ\par}%
+      \vspace{0.7cm}%
+    }{%
+      \begin{tikzpicture}[remember picture, overlay]
+        \node[anchor=north, xshift=\sustech@logox, yshift=\sustech@logoy]
+          at (current page.north) {%
+            \includegraphics[width=\sustech@formalogowidth,height=\sustech@formalogoheight,keepaspectratio]{\sustech@logo}%
+          };
+      \end{tikzpicture}%
+      \vspace*{\sustech@logospaceh}%
+      \vspace{0.7cm}%
+    }%
     {\large\sffamily\@reporttype\par}
     \vspace{0.35cm}
     {\Large\sffamily\color{SUSTechPrimary}\sustech@courseline\par}
@@ -1424,6 +1482,34 @@
   \chead{\footnotesize\sffamily\color{SUSTechMuted}\sustech@runningtitle}
   \rhead{\footnotesize\sffamily\thepage/\pageref{LastPage}}
 \fi
+
+% ---- Code repository URL footer ----
+% \codeurl{<url>}: when set, displays a clickable "Code available at: <url>"
+% line in the page footer.  Leave unset (default) to keep the footer empty.
+%
+% \detokenize stores _ as catcode-12 so URLs with underscores never enter math
+% mode when expanded.  \href provides a correct PDF URI.  The visible text uses
+% \color (not \textcolor): \textcolor calls \leavevmode, which is unsafe inside
+% fancyhdr's output-routine boxing context.
+\def\sustech@codeurl{}
+\newcommand{\codeurl}[1]{\edef\sustech@codeurl{\detokenize{#1}}}
+
+\renewcommand{\footrulewidth}{0pt}
+\AtBeginDocument{%
+  \ifdefempty{\sustech@codeurl}{}{%
+    \renewcommand{\footrulewidth}{0.3pt}%
+    \renewcommand{\footrule}{%
+      \hbox to\headwidth{%
+        {\color{SUSTechPrimary!40}\leaders\hrule height\footrulewidth\hfill}%
+      }%
+    }%
+    \lfoot{%
+      {\footnotesize\sffamily
+       \color{SUSTechMuted}Code available at:\enspace
+       \href{\sustech@codeurl}{{\color{SUSTechPrimary}\ttfamily\sustech@codeurl}}}%
+    }%
+  }%
+}
 
 %% ============================================================
 %% L15: Code backends (minted / listings, mutually exclusive)

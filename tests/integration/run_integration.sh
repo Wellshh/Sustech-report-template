@@ -77,6 +77,14 @@ run_assertions() {
       assert_pdf_lacks "$pdf" "??"
       ;;
 
+    test_int_codeurl_underscore)
+      assert_pdf_contains "$pdf" \
+        "UniqueCodeUrlUnderscore901" \
+        "Code available at" \
+        "foo_bar" \
+        "baz_qux"
+      ;;
+
     *)
       : # compile-only check for unknown stems
       ;;
@@ -105,6 +113,7 @@ run_module() {
 run_module "multi-author"
 run_module "themes"
 run_module "backends"
+run_module "codeurl"
 
 log_section "integration / examples"
 for tex in \

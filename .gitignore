@@ -13,6 +13,12 @@ example.*
 /examples/*.xml
 /examples/*.gz
 /examples/*.toc
+/**/*.aux
+/**/*.log
+/**/*.toc
+/**/*.out
+/**/*.listing
+/**/*.gz
 
 # Maintainer-only planning doc (not published with the repo)
 PLAN.md

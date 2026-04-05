@@ -1,0 +1,28 @@
+% Integration: \codeurl with underscores in the URL (GitHub-style paths).
+% Regression for footer typesetting and PDF link target integrity.
+% !TEX program = xelatex
+\documentclass[titlepage=formal,code=listings]{SUSTechHomework}
+
+\title{UniqueCodeUrlUnderscore901}
+\coursecode{INT901}
+\coursename{Code URL Footer Test}
+\semester{Spring 2026}
+\instructor{Prof. Test}
+\reporttype{Integration Test}
+
+% Deliberate underscores: must not trigger math mode or truncate the link.
+\codeurl{https://example.com/unique_user_repo/foo_bar/baz_qux}
+
+\begin{document}
+\clearauthors
+\addauthor{URL Tester}{90001}{t@sustech.edu.cn}{CSE}{Shuren}{Testing}
+\maketitle
+
+\section{Body}
+Placeholder so the PDF has more than one page and the footer repeats.
+\par\vfill
+Second page content.
+\newpage
+Done.
+
+\end{document}

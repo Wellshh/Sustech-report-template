@@ -1,5 +1,12 @@
 # SUSTech Report Template
 
+> 一个完整的报告实例可以在![Sustech MAS Report](assignment/assignment1-tileworld/report.tex)找到！！
+
+Sustech其他Latex模版：https://github.com/SUSTC/latex-template
+
+## 快速开始
+直接将`.cls`文件加入自己的project，不管你使用的是本地/在线编译器，只用添加`\documentclass{yourpath/SUSTechHomework.cls}`
+
 ## 导读
 
 - ✅ **想马上开始**：直接看下面的「最小单作者示例」。
@@ -82,6 +89,11 @@
 - 支持标题页模式：
   - `titlepage=simple`
   - `titlepage=formal`
+- 支持封面 logo 图片（TikZ overlay，不影响其他组件位置）：
+  - `logo=<路径>` — 在封面顶部显示指定图片，替换默认的 `SUSTech` 文字
+  - `\sustechformallogosize` / `\sustechsimplelogosize` — 调整 logo 渲染尺寸
+  - `\sustechlogopos{x}{y}` — 自由移动 logo 叠层位置（不影响标题/作者块）
+  - `\sustechlogospace` / `\sustechsimplelogospace` — 独立控制内容块起始位置
 - 支持现代数学与单位接口：
   - `\qty` / `\num` / `\unit`
   - `\vect` / `\mat`
@@ -98,6 +110,8 @@
   - `\textcite` / `\parencite`
   - `\sustechprintbibliography`
   - DOI / URL / access date 显示
+- 支持代码仓库链接页脚：
+  - `\codeurl{<url>}` — 在每页页脚左侧显示 `Code available at: <url>`（`\detokenize` + `\href`，含 `_` 的 URL 也可正确显示与跳转），不设置则页脚保持空白
 - 支持代码后端选项：
   - `code=listings`
   - `code=minted`
@@ -151,6 +165,83 @@
 Hello SUSTech.
 \end{document}
 ```
+
+## 封面 Logo
+
+通过 `logo=` 类选项，可以在封面顶部显示一张大图（替代默认的 `SUSTech` 文字）。仓库 `assets/` 目录下已内置了以下官方标识文件：
+
+| 文件名 | 说明 |
+|--------|------|
+| `assets/校徽.pdf` | 仅校徽图案 |
+| `assets/校徽+中文校名-上下.pdf` | 校徽 + 中文校名，上下排列 |
+| `assets/校徽+中文校名-左右.pdf` | 校徽 + 中文校名，左右排列 |
+| `assets/校徽+中英文校名-上下.pdf` | 校徽 + 中英文校名，上下排列（**推荐**） |
+| `assets/校徽+中英文校名-左右.pdf` | 校徽 + 中英文校名，左右排列 |
+| `assets/火炬+英文校名-上下.pdf` | 火炬图案 + 英文校名，上下排列 |
+| `assets/火炬+英文校名-左右.pdf` | 火炬图案 + 英文校名，左右排列 |
+
+**用法示例：**
+
+```tex
+% formal 封面页，顶部显示校徽+中英文校名
+\documentclass[titlepage=formal,logo=assets/校徽+中英文校名-上下.pdf]{SUSTechHomework}
+```
+
+```tex
+% simple 内联标题，标题栏上方显示 logo
+\documentclass[titlepage=simple,logo=assets/校徽.pdf]{SUSTechHomework}
+```
+
+不填写 `logo=` 选项（或省略）时，保持原有的 `SUSTech` 文字显示。
+
+### Logo 尺寸、位置与内容布局（三个独立控制旋钮）
+
+Logo 以 **TikZ 页面叠层（overlay）** 的方式渲染，**不占用文档流高度**，因此调整 logo 的大小或位置，不会影响封面上 `reporttype`、标题、作者块等组件的位置。三个旋钮完全解耦，可以自由组合：
+
+| 命令 | 作用 | 默认值 |
+|------|------|--------|
+| `\sustechformallogosize{宽}{高}` | logo 图片的最大渲染边框（等比缩放） | `0.52\linewidth`, `3.5cm` |
+| `\sustechsimplelogosize{高}` | simple 模式下 logo 最大高度 | `2.2cm` |
+| `\sustechlogopos{x}{y}` | overlay 节点相对页面顶部中心的偏移（TikZ 坐标：`+x`=右，`+y`=上） | `0cm`, `-1.8cm` |
+| `\sustechlogospace{高}` | formal 封面顶部保留的固定空白（决定内容块起始位置） | `3.5cm` |
+| `\sustechsimplelogospace{高}` | simple 标题顶部保留的固定空白 | `2.2cm` |
+
+**典型用法（formal 模式）：**
+
+```tex
+% 图片渲染大一些
+\sustechformallogosize{0.65\linewidth}{4.2cm}
+% 把 logo 叠层下移到页面顶部 2cm 处（不影响其他内容位置）
+\sustechlogopos{0cm}{-2.0cm}
+% 如需同步调整内容块起始位置，单独控制：
+\sustechlogospace{4.0cm}
+```
+
+**典型用法（simple 模式）：**
+
+```tex
+\sustechsimplelogosize{3cm}
+\sustechlogopos{0cm}{-1.5cm}
+\sustechsimplelogospace{3cm}
+```
+
+> **注意**：`logo=` 接受的路径相对于 `.tex` 文件所在目录，也可以使用绝对路径。若使用校标，请遵守[南方科技大学视觉识别系统规范](https://www.sustech.edu.cn/zh/school_logo.html)。
+
+## 代码仓库链接页脚
+
+在导言区（`\begin{document}` 之前）写：
+
+```tex
+\codeurl{https://github.com/yourname/your-repo}
+```
+
+效果：每页页脚左侧出现带下划线的可点击链接：
+
+> Code available at: https://github.com/yourname/your-repo
+
+同时会自动显示一条淡色分隔线。不调用 `\codeurl` 时，页脚保持完全空白，与原来行为一致。
+
+**URL 中的 `_`（下划线）**：类文件内部用 `\detokenize` 保存地址，`_` 会按普通字符排版，并用 `\href` 生成完整 PDF 超链接，避免「显示错乱」或「点击后只跳到 `_` 之前」的问题。若地址里含有 `#` 或 `%`，在 `.tex` 源里仍受 TeX 特殊字符规则约束（`#` 会开启注释、`%` 会截断行），需自行用合适方式转义或拆成不含这些字符的短链。
 
 ## 多作者示例
 
